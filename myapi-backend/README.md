@@ -1,12 +1,4 @@
 # SpringBoot 项目初始模板
-
-> 作者：[程序员鱼皮](https://github.com/liyupi)
-> 仅分享于 [编程导航知识星球](https://yupi.icu)
-
-基于 Java SpringBoot 的项目初始模板，整合了常用框架和主流业务的示例代码。
-
-只需 1 分钟即可完成内容网站的后端！！！大家还可以在此基础上快速开发自己的项目。
-
 [toc]
 
 ## 模板特点
@@ -57,10 +49,6 @@
 - 帖子创建、删除、编辑、更新、数据库检索、ES 灵活检索
 - 帖子点赞、取消点赞
 - 帖子收藏、取消收藏、检索已收藏帖子
-- 帖子全量同步 ES、增量同步 ES 定时任务
-- 支持微信开放平台登录
-- 支持微信公众号订阅、收发消息、设置菜单
-- 支持分业务的文件上传
 
 ### 单元测试
 
@@ -130,36 +118,4 @@ spring:
 
 ```java
 @SpringBootApplication
-```
-
-### Elasticsearch 搜索引擎
-
-1）修改 `application.yml` 的 Elasticsearch 配置为你自己的：
-
-```yml
-spring:
-  elasticsearch:
-    uris: http://localhost:9200
-    username: root
-    password: 123456
-```
-
-2）复制 `sql/post_es_mapping.json` 文件中的内容，通过调用 Elasticsearch 的接口或者 Kibana Dev Tools 来创建索引（相当于数据库建表）
-
-```
-PUT post_v1
-{
- 参数见 sql/post_es_mapping.json 文件
-}
-```
-
-这步不会操作的话需要补充下 Elasticsearch 的知识，或者自行百度一下~
-
-3）开启同步任务，将数据库的帖子同步到 Elasticsearch
-
-找到 job 目录下的 `FullSyncPostToEs` 和 `IncSyncPostToEs` 文件，取消掉 `@Component` 注解的注释，再次执行程序即可触发同步：
-
-```java
-// todo 取消注释开启任务
-//@Component
 ```
