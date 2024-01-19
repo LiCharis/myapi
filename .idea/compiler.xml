@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="myapi-backend" />
+        <module name="myapi-interface" />
+        <module name="myapi-common-model" />
+        <module name="myapi-client-sdk" />
+        <module name="myapi-gateway" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="myapi-backend" target="1.8" />
+      <module name="myapi-client-sdk" target="1.8" />
+      <module name="myapi-common-model" target="1.8" />
+      <module name="myapi-gateway" target="1.5" />
+      <module name="myapi-interface" target="1.5" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

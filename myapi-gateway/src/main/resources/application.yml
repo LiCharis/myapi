@@ -1,0 +1,32 @@
+server:
+  port: 8090
+  servlet:
+    context-path: /api
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: test_route
+          uri: http://localhost:8123/api
+          predicates:
+            - Path=/api/name/**
+        - id: model_route
+          uri: http://localhost:8000/task
+          predicates:
+            - Path=/api/task/**
+        - id: BI_route
+          uri: http://localhost:8125/api/chart
+          predicates:
+            - Path=/api/chart/**
+
+
+dubbo:
+  application:
+    name: dubbo-springboot-demo-consumer
+  protocol:
+    name: dubbo
+    port: -1
+  registry:
+    id: nacos-registry
+    address: nacos://localhost:8848

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/myapi.iml" filepath="$PROJECT_DIR$/.idea/myapi.iml" />
+      <module fileurl="file://$PROJECT_DIR$/myapi-backend/myapi-backend.iml" filepath="$PROJECT_DIR$/myapi-backend/myapi-backend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/myapi-client-sdk/myapi-client-sdk.iml" filepath="$PROJECT_DIR$/myapi-client-sdk/myapi-client-sdk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/myapi-common-model/myapi-common-model.iml" filepath="$PROJECT_DIR$/myapi-common-model/myapi-common-model.iml" />
+      <module fileurl="file://$PROJECT_DIR$/myapi-gateway/myapi-gateway.iml" filepath="$PROJECT_DIR$/myapi-gateway/myapi-gateway.iml" />
+      <module fileurl="file://$PROJECT_DIR$/myapi-interface/myapi-interface.iml" filepath="$PROJECT_DIR$/myapi-interface/myapi-interface.iml" />
+    </modules>
+  </component>
+</project>

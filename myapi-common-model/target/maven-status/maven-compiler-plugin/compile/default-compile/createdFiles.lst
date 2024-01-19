@@ -1,0 +1,15 @@
+com\my\myapicommon\constant\CommonConstant.class
+com\my\myapicommon\common\ResultUtils.class
+com\my\myapicommon\common\IdRequest.class
+com\my\myapicommon\common\PageRequest.class
+com\my\myapicommon\model\InterfaceInfo.class
+com\my\myapicommon\model\User.class
+com\my\myapicommon\common\ErrorCode.class
+com\my\myapicommon\common\DeleteRequest.class
+com\my\myapicommon\common\BaseResponse.class
+com\my\myapicommon\model\UserInterfaceInfo.class
+com\my\myapicommon\service\InnerUserService.class
+com\my\myapicommon\constant\FileConstant.class
+com\my\myapicommon\service\InnerInterfaceInfoService.class
+com\my\myapicommon\service\InnerUserInterfaceInfoService.class
+com\my\myapicommon\constant\UserConstant.class
