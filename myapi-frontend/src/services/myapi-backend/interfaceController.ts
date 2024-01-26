@@ -40,7 +40,6 @@ export async function downloadFileUsingGet(
 ) {
   return request<API.Resource>('/api/interfaceInfo/download', {
     method: 'GET',
-    responseType:'blob',
     params: {
       ...params,
     },
@@ -65,7 +64,8 @@ export async function getInterfaceInfoVoByIdUsingGet(
 
 /** invokeInterfaceInfo POST /api/interfaceInfo/invoke */
 export async function invokeInterfaceInfoUsingPost(
-  params: API.InterfaceInfoInvokeRequest,
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.invokeInterfaceInfoUsingPOSTParams,
   body: {},
   file?: File,
   options?: { [key: string]: any },

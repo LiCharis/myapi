@@ -17,6 +17,7 @@
         <result property="requestBody" column="requestBody" jdbcType="VARCHAR"/>
         <result property="status" column="status" jdbcType="INTEGER"/>
         <result property="isUpload" column="isUpload" jdbcType="INTEGER"/>
+        <result property="isDownload" column="isDownload" jdbcType="INTEGER"/>
         <result property="method" column="method" jdbcType="VARCHAR"/>
         <result property="userId" column="userId" jdbcType="BIGINT"/>
         <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
@@ -28,7 +29,7 @@
         id
         ,name,description,
         protocol,host,path,parameteType,requestBody,requestHeader,responseHeader,
-        status,method,userId,isUpload,
+        status,method,userId,isUpload,isDownload,
         createTime,updateTime,isDelete
     </sql>
 </mapper>

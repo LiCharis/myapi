@@ -232,7 +232,7 @@ const InterfaceInfo: React.FC = () => {
             <Divider/>
             <Form name={'download'} layout={'vertical'} onFinish={download}>
               <Form.Item>
-                {invokeRes ? (
+                {data?.isDownload && invokeRes ? (
                   <Button type="primary" htmlType="submit">
                     下载
                   </Button>

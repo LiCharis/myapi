@@ -1,11 +1,11 @@
 // https://umijs.org/config/
-import { defineConfig } from '@umijs/max';
-import { join } from 'path';
+import {defineConfig} from '@umijs/max';
+import {join} from 'path';
 import defaultSettings from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
 
-const { REACT_APP_ENV = 'dev' } = process.env;
+const {REACT_APP_ENV = 'dev'} = process.env;
 
 export default defineConfig({
   /**
@@ -81,6 +81,23 @@ export default defineConfig({
     locale: true,
     ...defaultSettings,
   },
+  // layout: {
+  //   locale:true,
+  //   name: 'API开放平台',
+  //   title:'API开放平台',
+  //   logo: 'public/logo.svg',
+  //   // copy from pro site
+  //   navTheme: "light",
+  //   layout: "top",
+  //   contentWidth: "Fixed",
+  //   fixedHeader: false,
+  //   fixSiderbar: true,
+  //   colorPrimary: "#1677FF",
+  //   splitMenus: false
+  //
+  // },
+
+
   /**
    * @name moment2dayjs 插件
    * @description 将项目中的 moment 替换为 dayjs
@@ -125,7 +142,7 @@ export default defineConfig({
    */
   headScripts: [
     // 解决首次加载时白屏的问题
-    { src: '/scripts/loading.js', async: true },
+    {src: '/scripts/loading.js', async: true},
   ],
   //================ pro 插件配置 =================
   presets: ['umi-presets-pro'],

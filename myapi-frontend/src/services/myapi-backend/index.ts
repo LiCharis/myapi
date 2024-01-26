@@ -5,6 +5,7 @@
 import * as fileController from './fileController';
 import * as interfaceController from './interfaceController';
 import * as interfaceInfoAnalyseController from './interfaceInfoAnalyseController';
+import * as loginController from './loginController';
 import * as postController from './postController';
 import * as postFavourController from './postFavourController';
 import * as postThumbController from './postThumbController';
@@ -16,6 +17,7 @@ export default {
   interfaceInfoAnalyseController,
   fileController,
   interfaceController,
+  loginController,
   postController,
   postFavourController,
   postThumbController,

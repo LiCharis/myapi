@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.my.myapicommon.model.User;
+import com.my.springbootinit.common.BaseResponse;
 import com.my.springbootinit.common.ErrorCode;
 import com.my.springbootinit.constant.CommonConstant;
 import com.my.springbootinit.exception.BusinessException;
@@ -35,7 +36,6 @@ import org.springframework.util.DigestUtils;
  * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
  * @from <a href="https://yupi.icu">编程导航知识星球</a>
  */
-@Service
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
@@ -50,7 +50,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
-        if (userAccount.length() < 4) {
+        if (userAccount.length() < 2) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户账号过短");
         }
         if (userPassword.length() < 8 || checkPassword.length() < 8) {
@@ -77,6 +77,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             // 4. 插入数据
             User user = new User();
             user.setUserAccount(userAccount);
+            user.setUserName(userAccount);
             user.setUserPassword(encryptPassword);
             user.setAccessKey(accesskey);
             user.setSecretKey(secretKey);
@@ -94,7 +95,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
-        if (userAccount.length() < 4) {
+        if (userAccount.length() < 2) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号错误");
         }
         if (userPassword.length() < 8) {
@@ -116,6 +117,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         request.getSession().setAttribute(USER_LOGIN_STATE, user);
         return this.getLoginUserVO(user);
     }
+
 
     /**
      * 获取当前登录用户

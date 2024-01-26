@@ -10,7 +10,7 @@
   {
     path: '/user',
     layout: false,
-    routes: [{ path: '/user/login', component: './User/Login' }],
+    routes: [{ path: '/user/login', component: './User/Login' },{ path: '/user/register', component: './User/Register' }],
   },
   {
     path: '/admin',
@@ -29,9 +29,14 @@
   },
   {
     path: '/userManager',
-    name: '个人中心',
+    name: '用户中心',
     icon: 'crown',
     routes: [
+      {
+        path: '/userManager/information',
+        name:'个人信息',
+        component: './User/Personal/information',
+      },
       {
         path: '/userManager/personalInvoke',
         name:'接口调用情况',

@@ -29,6 +29,18 @@ export async function deleteUserUsingPost(
   });
 }
 
+/** deleteMyUser POST /api/user/delete/my */
+export async function deleteMyUserUsingPost(body: API.IdRequest, options?: { [key: string]: any }) {
+  return request<API.BaseResponse>('/api/user/delete/my', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
 /** getUserById GET /api/user/get */
 export async function getUserByIdUsingGet(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
@@ -158,12 +170,42 @@ export async function updateKeysUsingPost(options?: { [key: string]: any }) {
   });
 }
 
-/** updateMyUser POST /api/user/update/my */
+/** updateMyUserAccount POST /api/user/update/myAccount */
+export async function updateMyUserAccountUsingPost(
+  body: API.UserUpdateMyRequest,
+  options?: { [key: string]: any },
+) {
+  return request<API.BaseResponseBoolean_>('/api/user/update/myAccount', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** updateMyUser POST /api/user/update/myBasic */
 export async function updateMyUserUsingPost(
   body: API.UserUpdateMyRequest,
   options?: { [key: string]: any },
 ) {
-  return request<API.BaseResponseBoolean_>('/api/user/update/my', {
+  return request<API.BaseResponseBoolean_>('/api/user/update/myBasic', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** updateMyUserPassword POST /api/user/update/myPassword */
+export async function updateMyUserPasswordUsingPost(
+  body: API.UserUpdateMyRequest,
+  options?: { [key: string]: any },
+) {
+  return request<API.BaseResponseBoolean_>('/api/user/update/myPassword', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

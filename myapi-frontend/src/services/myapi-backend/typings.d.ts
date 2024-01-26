@@ -1,4 +1,10 @@
 declare namespace API {
+  type BaseResponse = {
+    code?: number;
+    data?: Record<string, any>;
+    message?: string;
+  };
+
   type BaseResponseBoolean_ = {
     code?: number;
     data?: boolean;
@@ -152,6 +158,8 @@ declare namespace API {
     host?: string;
     id?: string;
     isDelete?: number;
+    isDownload?: number;
+    isUpload?: number;
     method?: string;
     name?: string;
     parameterType?: string;
@@ -163,7 +171,6 @@ declare namespace API {
     status?: number;
     updateTime?: string;
     userId?: string;
-    isUpload?: number;
   };
 
   type InterfaceInfoAddRequest = {
@@ -178,11 +185,6 @@ declare namespace API {
     requestHeader?: string;
     responseHeader?: string;
     userId?: string;
-  };
-
-  type InterfaceInfoInvokeRequest = {
-    id?: string;
-    userRequestBody?: string;
   };
 
   type InterfaceInfoQueryRequest = {
@@ -226,6 +228,8 @@ declare namespace API {
     host?: string;
     id?: string;
     isDelete?: number;
+    isDownload?: number;
+    isUpload?: number;
     leftNum?: number;
     method?: string;
     name?: string;
@@ -241,12 +245,32 @@ declare namespace API {
     userId?: string;
   };
 
+  type invokeInterfaceInfoUsingPOSTParams = {
+    id?: string;
+    userRequestBody?: string;
+  };
+
+  type loginByGiteeUsingGETParams = {
+    /** code */
+    code?: string;
+    /** state */
+    state?: string;
+  };
+
+  type loginByGithubUsingGETParams = {
+    /** code */
+    code?: string;
+    /** state */
+    state?: string;
+  };
+
   type LoginUserVO = {
     accessKey?: string;
     createTime?: string;
     id?: string;
     secretKey?: string;
     updateTime?: string;
+    userAccount?: string;
     userAvatar?: string;
     userName?: string;
     userProfile?: string;
@@ -491,8 +515,12 @@ declare namespace API {
   };
 
   type UserUpdateMyRequest = {
+    userAccount?: string;
     userAvatar?: string;
+    userCheckPassword?: string;
+    userCurrentPassword?: string;
     userName?: string;
+    userNewPassword?: string;
     userProfile?: string;
   };
 
