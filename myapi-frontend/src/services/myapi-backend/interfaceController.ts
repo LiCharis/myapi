@@ -99,6 +99,7 @@ export async function invokeInterfaceInfoUsingPost(
     },
     data: formData,
     requestType: 'form',
+    responseType:'blob',
     ...(options || {}),
   });
 }
