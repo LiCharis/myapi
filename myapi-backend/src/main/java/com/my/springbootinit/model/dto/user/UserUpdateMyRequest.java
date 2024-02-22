@@ -12,6 +12,29 @@ import lombok.Data;
 @Data
 public class UserUpdateMyRequest implements Serializable {
 
+
+    /**
+     * 用户名
+     */
+    private String userAccount;
+
+    /**
+     * 用户当前的密码
+     */
+    private String userCurrentPassword;
+
+    /**
+     * 用户新密码
+     */
+    private String userNewPassword;
+
+    /**
+     * 用户确认密码
+     */
+    private String userCheckPassword;
+
+
+
     /**
      * 用户昵称
      */

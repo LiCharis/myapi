@@ -2,6 +2,7 @@ package com.my.springbootinit.controller;
 
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.DigestUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.my.myapicommon.model.User;
 import com.my.springbootinit.annotation.AuthCheck;
@@ -20,22 +21,19 @@ import com.my.springbootinit.model.vo.LoginUserVO;
 import com.my.springbootinit.model.vo.UserVO;
 import com.my.springbootinit.service.UserService;
 
-import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
 import lombok.extern.slf4j.Slf4j;
-import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
-import me.chanjar.weixin.common.bean.oauth2.WxOAuth2AccessToken;
-import me.chanjar.weixin.mp.api.WxMpService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -179,7 +177,7 @@ public class UserController {
     @PostMapping("/update")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest,
-            HttpServletRequest request) {
+                                            HttpServletRequest request) {
         if (userUpdateRequest == null || userUpdateRequest.getId() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -232,7 +230,7 @@ public class UserController {
     @PostMapping("/list/page")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Page<User>> listUserByPage(@RequestBody UserQueryRequest userQueryRequest,
-            HttpServletRequest request) {
+                                                   HttpServletRequest request) {
         long current = userQueryRequest.getCurrent();
         long size = userQueryRequest.getPageSize();
         Page<User> userPage = userService.page(new Page<>(current, size),
@@ -249,7 +247,7 @@ public class UserController {
      */
     @PostMapping("/list/page/vo")
     public BaseResponse<Page<UserVO>> listUserVOByPage(@RequestBody UserQueryRequest userQueryRequest,
-            HttpServletRequest request) {
+                                                       HttpServletRequest request) {
         if (userQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -268,19 +266,20 @@ public class UserController {
     // endregion
 
     /**
-     * 更新个人信息
+     * 更新个人基本信息
      *
      * @param userUpdateMyRequest
      * @param request
      * @return
      */
-    @PostMapping("/update/my")
+    @PostMapping("/update/myBasic")
     public BaseResponse<Boolean> updateMyUser(@RequestBody UserUpdateMyRequest userUpdateMyRequest,
-            HttpServletRequest request) {
+                                              HttpServletRequest request) {
         if (userUpdateMyRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLoginUser(request);
+
         User user = new User();
         BeanUtils.copyProperties(userUpdateMyRequest, user);
         user.setId(loginUser.getId());
@@ -290,8 +289,128 @@ public class UserController {
     }
 
 
+    /**
+     * 修改用户名
+     *
+     * @param userUpdateMyRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/update/myAccount")
+    public BaseResponse<Boolean> updateMyUserAccount(@RequestBody UserUpdateMyRequest userUpdateMyRequest,
+                                                     HttpServletRequest request) {
+        if (userUpdateMyRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+
+        User loginUser = userService.getLoginUser(request);
+
+        String userCurrentPassword = loginUser.getUserPassword();
+        String userAccount = userUpdateMyRequest.getUserAccount();
+        String currentPassword = userUpdateMyRequest.getUserCurrentPassword();
+        if (StringUtils.isAnyBlank(currentPassword, userAccount)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
+        }
+
+        //验证密码是否正确
+        // 加密
+        currentPassword = DigestUtils.md5DigestAsHex(("yupi" + currentPassword).getBytes());
+        if (!currentPassword.equals(userCurrentPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "输入的当前用户密码不正确");
+        }
+
+
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userAccount", userAccount);
+        queryWrapper.eq("isDelete", 0);
+        User user = userService.getOne(queryWrapper);
+        if (user != null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "该用户名已被使用");
+        }
+        User user1 = new User();
+        user1.setId(loginUser.getId());
+        user1.setUserAccount(userAccount);
+        boolean result = userService.updateById(user1);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return ResultUtils.success(true);
+    }
+
+
+    /**
+     * 修改用户密码
+     *
+     * @param userUpdateMyRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/update/myPassword")
+    public BaseResponse<Boolean> updateMyUserPassword(@RequestBody UserUpdateMyRequest userUpdateMyRequest,
+                                                      HttpServletRequest request) {
+        if (userUpdateMyRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        String userCurrentPassword = loginUser.getUserPassword();
+        String currentPassword = userUpdateMyRequest.getUserCurrentPassword();
+        String userNewPassword = userUpdateMyRequest.getUserNewPassword();
+        String userCheckPassword = userUpdateMyRequest.getUserCheckPassword();
+        if (StringUtils.isAnyBlank(currentPassword, userNewPassword, userCheckPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
+        }
+        if (!userNewPassword.equals(userCheckPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次输出的密码不一致");
+        }
+
+        //验证密码是否正确
+        // 加密
+        currentPassword = DigestUtils.md5DigestAsHex(("yupi" + currentPassword).getBytes());
+        if (!currentPassword.equals(userCurrentPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "输入的当前用户密码不正确");
+        }
+        //修改密码
+        User user = new User();
+        user.setId(loginUser.getId());
+        //加密修改
+        userNewPassword = DigestUtils.md5DigestAsHex(("yupi" + userNewPassword).getBytes());
+        user.setUserPassword(userNewPassword);
+        boolean result = userService.updateById(user);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return ResultUtils.success(true);
+    }
+
+
+    /**
+     * 用户注销
+     *
+     * @param idRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/delete/my")
+    public BaseResponse deleteMyUser(@RequestBody IdRequest idRequest, HttpServletRequest request) {
+        if (request == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        Long userId = loginUser.getId();
+        Long id = idRequest.getId();
+        if (Objects.equals(id, userId)) {
+            boolean removeById = userService.removeById(loginUser);
+            if (!removeById) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "用户注销失败");
+            }
+            boolean result = userService.userLogout(request);
+            ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+
+            return ResultUtils.success(true);
+
+        }
+        return ResultUtils.error(ErrorCode.PARAMS_ERROR, "当前注销用户不是登录用户");
+    }
+
+
     @PostMapping("/update/keys")
-    public BaseResponse<Boolean> updateKeys(HttpServletRequest request){
+    public BaseResponse<Boolean> updateKeys(HttpServletRequest request) {
 
 
         User loginUser = userService.getLoginUser(request);

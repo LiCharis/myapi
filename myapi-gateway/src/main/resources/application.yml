@@ -4,6 +4,8 @@ server:
     context-path: /api
 
 spring:
+  main:
+    web-application-type: reactive
   cloud:
     gateway:
       routes:
@@ -19,6 +21,12 @@ spring:
           uri: http://localhost:8125/api/chart
           predicates:
             - Path=/api/chart/**
+
+        - id: QA_route
+          uri: http://localhost:8001/api/qasystem
+          predicates:
+            - Path=/api/qasystem/**
+
 
 
 dubbo:

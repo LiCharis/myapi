@@ -88,6 +88,11 @@ public class InterfaceInfo implements Serializable {
     private Integer isUpload;
 
     /**
+     * 是否结果是否可以下载(0-不能 1-可以)
+     */
+    private Integer isDownload;
+
+    /**
      * 创建时间
      */
     private Date createTime;

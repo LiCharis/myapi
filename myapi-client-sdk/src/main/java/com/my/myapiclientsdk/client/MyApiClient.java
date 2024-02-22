@@ -9,12 +9,7 @@ import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
 import com.google.gson.Gson;
 import com.my.myapiclientsdk.model.GenChartByAiRequest;
-import com.my.myapiclientsdk.model.ModelInterfaceInfo;
-import com.my.myapiclientsdk.model.User;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
-
 
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +33,15 @@ public class MyApiClient {
         this.accessKey = accessKey;
         this.secretKey = secretKey;
         this.interfaceInfoId = interfaceInfoId;
+    }
+
+
+    public String generateByQASystem(String input){
+        HttpResponse httpResponse = HttpRequest.post(GATEWAY_HOST + "/qasystem/getRes")
+                .form("input",input)
+                .addHeaders(getHeaders(input))
+                .execute();
+        return httpResponse.body();
     }
 
 
