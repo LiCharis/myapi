@@ -22,8 +22,9 @@ import {
   Upload,
 } from 'antd';
 import moment from 'moment';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {useParams} from 'react-router';
+
 
 /**
  * 主页
@@ -32,6 +33,7 @@ import {useParams} from 'react-router';
 
 const InterfaceInfo: React.FC = () => {
   const {initialState} = useModel('@@initialState');
+  const loginUser = initialState?.loginUser;
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<API.InterfaceInfo>();
   const [invokeRes, setInvokeRes] = useState<any>();
@@ -130,6 +132,8 @@ const InterfaceInfo: React.FC = () => {
       },
     ];
 
+
+
   const onFinish = async (values: any) => {
     if (!params.id) {
       message.error('接口不存在');
@@ -142,12 +146,12 @@ const InterfaceInfo: React.FC = () => {
         {
           ...values,
           id: params.id,
+          userId: loginUser?.id,
           file: undefined,
         },
         {},
         file,
       );
-
       if (res.code === 0) {
         if (typeof res.data !== 'string') {
           res.data = JSON.stringify(res.data);

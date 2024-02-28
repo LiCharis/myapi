@@ -18,6 +18,8 @@
         <result property="status" column="status" jdbcType="INTEGER"/>
         <result property="isUpload" column="isUpload" jdbcType="INTEGER"/>
         <result property="isDownload" column="isDownload" jdbcType="INTEGER"/>
+        <result property="totalNum" column="totalNum" jdbcType="INTEGER"/>
+        <result property="leftNum" column="leftNum" jdbcType="INTEGER"/>
         <result property="method" column="method" jdbcType="VARCHAR"/>
         <result property="userId" column="userId" jdbcType="BIGINT"/>
         <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
@@ -27,9 +29,9 @@
 
     <sql id="Base_Column_List">
         id
-        ,name,description,
-        protocol,host,path,parameteType,requestBody,requestHeader,responseHeader,
-        status,method,userId,isUpload,isDownload,
-        createTime,updateTime,isDelete
+        ,`name`,description,
+        protocol,host,`path`,parameteType,requestBody,requestHeader,responseHeader,
+        status,`method`,userId,isUpload,isDownload,
+        createTime,updateTime,isDelete,leftNum,totalNum
     </sql>
 </mapper>

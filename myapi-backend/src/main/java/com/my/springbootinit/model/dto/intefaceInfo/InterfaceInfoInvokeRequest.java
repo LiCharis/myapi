@@ -1,6 +1,7 @@
 package com.my.springbootinit.model.dto.intefaceInfo;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.my.springbootinit.annotation.RequestKeyParam;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -8,19 +9,27 @@ import java.io.Serializable;
 /**
  * 接口调用请求
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
- * @from <a href="https://yupi.icu">编程导航知识星球</a>
+ 
  */
 @Data
 public class InterfaceInfoInvokeRequest implements Serializable {
     /**
-     * id
+     * 接口id
      */
+    //加入自定义注解，表示该字段需要鉴定是否是
+    @RequestKeyParam
     private Long id;
+
+    /**
+     * 用户id
+     */
+    @RequestKeyParam
+    private Long userId;
 
     /**
      * 请求参数
      */
+    @RequestKeyParam
     private String userRequestBody;
 
 

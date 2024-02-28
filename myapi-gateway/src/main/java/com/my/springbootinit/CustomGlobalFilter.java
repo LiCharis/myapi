@@ -52,7 +52,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
     InnerInterfaceInfoService innerInterfaceInfoService;
 
     @DubboReference
-    InnerUserInterfaceInfoService userInterfaceInfoService;
+    InnerUserInterfaceInfoService innerUserInterfaceInfoService;
 
     private static final List<String> WHITE_LIST = Collections.singletonList("127.0.0.1");
 
@@ -153,15 +153,20 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         Long userId = invokeUser.getId();
         long interfaceInfoId = Long.parseLong(interfaceInfoId1);
 
+        InterfaceInfo interfaceInfo = innerInterfaceInfoService.getInterfaceInfo(interfaceInfoId);
+        if (interfaceInfo.getLeftNum() <= 0){
+            return handleNoAuth(response, "该接口的总剩余调用次数已用尽");
+        }
 
 
         /**
          * 判断该用户对于该接口是否还剩余调用次数/如果该记录不存在，调用的方法也会先创建一条新纪录
          */
-        UserInterfaceInfo userInterfaceInfo = userInterfaceInfoService.getUserInterfaceInfo(userId, interfaceInfoId);
+        UserInterfaceInfo userInterfaceInfo = innerUserInterfaceInfoService.getUserInterfaceInfo(userId, interfaceInfoId);
         if (userInterfaceInfo.getLeftNum() <= 0) {
-            return handleNoAuth(response, "接口剩余调用次数已用尽");
+            return handleNoAuth(response, "您对于该接口的剩余调用次数已用尽");
         }
+
 
         /**
          * 5.请求转发，调用接口
@@ -254,7 +259,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
                                  *    接口调用成功，次数更改接口调用次数 +1
                                  */
                                 try {
-                                    userInterfaceInfoService.invokeCount(userId, interfaceInfoId);
+                                    innerUserInterfaceInfoService.invokeCount(userId, interfaceInfoId);
                                 } catch (Exception e) {
                                     log.error("invokeCount error");
                                 }

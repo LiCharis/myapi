@@ -43,6 +43,7 @@ export async function downloadFileUsingGet(
     params: {
       ...params,
     },
+    responseType:'blob',
     ...(options || {}),
   });
 }
@@ -71,7 +72,7 @@ export async function invokeInterfaceInfoUsingPost(
   options?: { [key: string]: any },
 ) {
   const formData = new FormData();
-
+  // const uuid = require('uuid');
   if (file) {
     formData.append('file', file);
   }
@@ -94,12 +95,12 @@ export async function invokeInterfaceInfoUsingPost(
 
   return request<Record<string, any>>('/api/interfaceInfo/invoke', {
     method: 'POST',
+    // headers:{"requestId":uuid.v4()},
     params: {
       ...params,
     },
     data: formData,
     requestType: 'form',
-    responseType:'blob',
     ...(options || {}),
   });
 }

@@ -17,6 +17,7 @@ import com.my.springbootinit.utils.SqlUtils;
 import org.apache.commons.lang3.ObjectUtils;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
@@ -120,25 +121,36 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
     }
 
 
+    /**
+     * 事务方法，在操作mysql时添加行锁
+     * @param userId
+     * @param interfaceInfoId
+     * @return
+     */
+    @Transactional
     @Override
     public boolean invokeCount(long userId, long interfaceInfoId) {
         //判断id是否有效
         if (userId <= 0 || interfaceInfoId <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        //调用接口后的次数变化
+        //调用接口后的该用户调用次数变化
         UpdateWrapper<UserInterfaceInfo> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("userId", userId);
         updateWrapper.eq("interfaceInfoId", interfaceInfoId);
         //leftNum不能小于0
         updateWrapper.gt("leftNum", 0);
+
+        //调用后接口总次数变化
+        UpdateWrapper<InterfaceInfo> interfaceInfoUpdateWrapper = new UpdateWrapper<>();
+        interfaceInfoUpdateWrapper.eq("id",interfaceInfoId);
+        interfaceInfoUpdateWrapper.gt("leftNum",0);
         /**
-         * todo 这里得考虑加锁
+         * 这里加了行锁，一条一条执行@Transactional
          */
-
         updateWrapper.setSql("totalNum = totalNum + 1,leftNum = leftNum - 1");
-        return this.update(updateWrapper);
-
+        interfaceInfoUpdateWrapper.setSql("totalNum = totalNum + 1,leftNum = leftNum - 1");
+        return this.update(updateWrapper) && interfaceInfoService.update(interfaceInfoUpdateWrapper);
 
     }
 }

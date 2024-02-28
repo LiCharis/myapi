@@ -247,6 +247,7 @@ declare namespace API {
 
   type invokeInterfaceInfoUsingPOSTParams = {
     id?: string;
+    userId?:string;
     userRequestBody?: string;
   };
 

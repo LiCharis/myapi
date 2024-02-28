@@ -11,11 +11,13 @@ import com.my.myapiclientsdk.model.ModelInterfaceInfo;
 import com.my.myapicommon.model.InterfaceInfo;
 import com.my.myapicommon.model.User;
 import com.my.springbootinit.annotation.AuthCheck;
+import com.my.springbootinit.annotation.IdempotentCheck;
 import com.my.springbootinit.common.*;
 import com.my.springbootinit.constant.UserConstant;
 import com.my.springbootinit.exception.BusinessException;
 import com.my.springbootinit.exception.ThrowUtils;
 
+import com.my.springbootinit.manager.RedisLimiterManager;
 import com.my.springbootinit.mapper.ModelInterfaceInfoMapper;
 import com.my.springbootinit.model.dto.intefaceInfo.InterfaceInfoAddRequest;
 import com.my.springbootinit.model.dto.intefaceInfo.InterfaceInfoInvokeRequest;
@@ -53,8 +55,7 @@ import java.util.List;
 /**
  * 帖子接口
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
- * @from <a href="https://yupi.icu">编程导航知识星球</a>
+ 
  */
 @RestController
 @RequestMapping("/interfaceInfo")
@@ -72,6 +73,9 @@ public class InterfaceController {
 
     @Resource
     private ModelInterfaceInfoMapper modelInterfaceInfoMapper;
+
+    @Resource
+    private RedisLimiterManager redisLimiterManager;
 
     @Resource
     private ModelInterfaceInfoService modelInterfaceInfoService;
@@ -256,15 +260,25 @@ public class InterfaceController {
      * @return
      */
     @PostMapping("/invoke")
+    @AuthCheck(mustRole = UserConstant.DEFAULT_ROLE)
+    @IdempotentCheck(prefix = "invoke")
     public Object invokeInterfaceInfo(@RequestPart(name = "file", required = false) MultipartFile multipartFile,InterfaceInfoInvokeRequest interfaceInfoInvokeRequest, HttpServletRequest request) throws NoSuchFieldException, IOException {
         if (interfaceInfoInvokeRequest == null || interfaceInfoInvokeRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
 
 
+
+
         // 判断是否存在
         Long id = interfaceInfoInvokeRequest.getId();
+        Long userId = interfaceInfoInvokeRequest.getUserId();
         String requestBody = interfaceInfoInvokeRequest.getUserRequestBody();
+
+        /**
+         * 对用户做限流,及针对某用户对调用AI请求做出限制
+         */
+        redisLimiterManager.doReteLimit(id + "&" + userId);
 
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
         ThrowUtils.throwIf(oldInterfaceInfo == null, ErrorCode.NOT_FOUND_ERROR);
@@ -343,7 +357,7 @@ public class InterfaceController {
          * 发现是在后端在完成发送对接口调用的请求后，返回的时候多套了一层BaseRonponse。
          * 为了更好的区分网关权限错误类别及统一接口返回结果的格式，
          * 因此将后端返回的格式设置为字符串String，转为BaseResponse格式的工作交由网关和接口，
-         * 这样不仅统一格式，前端也好同意去取数据呈现。（1.5h）
+         * 这样不仅统一格式，前端也好统一去取数据呈现。（1.5h）
          */
 
         return result;

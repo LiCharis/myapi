@@ -88,6 +88,16 @@ public class InterfaceInfo implements Serializable {
     private Integer isUpload;
 
     /**
+     * 接口总调用次数
+     */
+    private Integer totalNum;
+
+    /**
+     * 剩余总调用次数
+     */
+    private Integer leftNum;
+
+    /**
      * 是否结果是否可以下载(0-不能 1-可以)
      */
     private Integer isDownload;

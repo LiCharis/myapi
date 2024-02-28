@@ -31,15 +31,12 @@ public class InnerInterfaceInfoServiceImpl
 
 
     @Override
-    public InterfaceInfo getInterfaceInfo(String protocol, String host, String path, String method) {
-        if (StringUtils.isAnyBlank(protocol, host, path, method)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
+    public InterfaceInfo getInterfaceInfo(Long id) {
+       if (id == null){
+           throw new BusinessException(ErrorCode.PARAMS_ERROR);
+       }
         QueryWrapper<InterfaceInfo> interfaceInfoQueryWrapper = new QueryWrapper<>();
-        interfaceInfoQueryWrapper.eq("protocol", protocol);
-        interfaceInfoQueryWrapper.eq("host", host);
-        interfaceInfoQueryWrapper.eq("path", path);
-        interfaceInfoQueryWrapper.eq("method", method);
+        interfaceInfoQueryWrapper.eq("id",id);
         InterfaceInfo interfaceInfo = interfaceInfoMapper.selectOne(interfaceInfoQueryWrapper);
         if (interfaceInfo == null || interfaceInfo.getStatus() == 0) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "接口不存在或者已被下线");

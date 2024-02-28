@@ -3,6 +3,8 @@ import { DownloadOutlined, RedoOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import { useModel } from '@umijs/max';
 import { Button, Card, Descriptions, DescriptionsProps, Divider, Form, message, Modal } from 'antd';
+import { Typography } from 'antd';
+const { Paragraph, Text } = Typography;
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 
@@ -40,12 +42,12 @@ const Keys: React.FC = () => {
         {
           key: '2',
           label: 'accessKey',
-          children: data.accessKey,
+          children:<Paragraph copyable>{data.accessKey}</Paragraph>
         },
         {
           key: '3',
           label: 'secretKey',
-          children: data.secretKey,
+          children: <Paragraph copyable>{data.secretKey}</Paragraph>,
         },
         {
           key: '4',
