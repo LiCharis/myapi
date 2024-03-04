@@ -3,7 +3,7 @@ package com.my.springbootinit.controller;
 import cn.hutool.core.io.FileUtil;
 import com.my.myapicommon.model.User;
 import com.my.springbootinit.common.BaseResponse;
-import com.my.springbootinit.common.ErrorCode;
+import com.my.myapicommon.common.ErrorCode;
 import com.my.springbootinit.common.ResultUtils;
 import com.my.springbootinit.constant.FileConstant;
 import com.my.springbootinit.exception.BusinessException;

@@ -1,6 +1,6 @@
 package com.my.springbootinit.manager;
 
-import com.my.springbootinit.common.ErrorCode;
+import com.my.myapicommon.common.ErrorCode;
 import com.my.springbootinit.exception.BusinessException;
 import org.redisson.api.RRateLimiter;
 import org.redisson.api.RateIntervalUnit;

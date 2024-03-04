@@ -1,8 +1,9 @@
 package com.my.springbootinit.aop;
 
+import com.my.myapicommon.common.ErrorCode;
 import com.my.myapicommon.model.User;
 import com.my.springbootinit.annotation.AuthCheck;
-import com.my.springbootinit.common.ErrorCode;
+import com.my.myapicommon.common.ErrorCode;
 import com.my.springbootinit.exception.BusinessException;
 
 import com.my.springbootinit.model.enums.UserRoleEnum;

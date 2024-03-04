@@ -1,7 +1,7 @@
 package com.my.springbootinit.exception;
 
 import com.my.springbootinit.common.BaseResponse;
-import com.my.springbootinit.common.ErrorCode;
+import com.my.myapicommon.common.ErrorCode;
 import com.my.springbootinit.common.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;

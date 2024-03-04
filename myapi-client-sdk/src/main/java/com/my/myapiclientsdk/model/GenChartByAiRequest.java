@@ -6,9 +6,6 @@ import java.io.Serializable;
 
 /**
  * 文件上传请求
- *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
- * @from <a href="https://yupi.icu">编程导航知识星球</a>
  */
 @Data
 public class GenChartByAiRequest implements Serializable {
@@ -28,6 +25,11 @@ public class GenChartByAiRequest implements Serializable {
      * 图表类型
      */
     private String chartType;
+
+    /**
+     * 生成策略
+     */
+    private String strategy;
 
     private static final long serialVersionUID = 1L;
 }

@@ -221,7 +221,7 @@ const InterfaceInfo: React.FC = () => {
               ) : null}
 
               <Form.Item label="输入请求参数" name={'userRequestBody'}>
-                <Input.TextArea size={"large"} autoSize placeholder="请输入请求参数"/>
+                <Input.TextArea size={"large"} autoSize placeholder="请输入请求参数" />
               </Form.Item>
               <Form.Item>
                 <Button type="primary" htmlType="submit">

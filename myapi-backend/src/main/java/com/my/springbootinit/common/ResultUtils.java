@@ -1,5 +1,7 @@
 package com.my.springbootinit.common;
 
+import com.my.myapicommon.common.ErrorCode;
+
 /**
  * 返回工具类
  *

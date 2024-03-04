@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.my.myapicommon.model.User;
-import com.my.springbootinit.common.ErrorCode;
+import com.my.myapicommon.common.ErrorCode;
 import com.my.springbootinit.exception.BusinessException;
 import com.my.springbootinit.mapper.PostFavourMapper;
 import com.my.springbootinit.model.entity.Post;

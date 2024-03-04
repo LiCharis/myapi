@@ -3,7 +3,7 @@ package com.my.springbootinit.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.my.myapicommon.model.InterfaceInfo;
-import com.my.springbootinit.common.ErrorCode;
+import com.my.myapicommon.common.ErrorCode;
 import com.my.springbootinit.constant.CommonConstant;
 import com.my.springbootinit.exception.BusinessException;
 import com.my.springbootinit.exception.ThrowUtils;
@@ -87,6 +87,11 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
         Integer status = interfaceInfoQueryRequest.getStatus();
         String method = interfaceInfoQueryRequest.getMethod();
         Long userId = interfaceInfoQueryRequest.getUserId();
+        Integer isDownload = interfaceInfoQueryRequest.getIsDownload();
+        Integer isUpload = interfaceInfoQueryRequest.getIsUpload();
+        Integer leftNum = interfaceInfoQueryRequest.getLeftNum();
+        Integer totalNum = interfaceInfoQueryRequest.getTotalNum();
+
         long current = interfaceInfoQueryRequest.getCurrent();
         long pageSize = interfaceInfoQueryRequest.getPageSize();
 
@@ -105,6 +110,10 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
         queryWrapper.eq(ObjectUtils.isNotEmpty(requestHeader), "requestHeader", requestHeader);
         queryWrapper.eq(ObjectUtils.isNotEmpty(responseHeader), "responseHeader", responseHeader);
         queryWrapper.eq(ObjectUtils.isNotEmpty(status), "status", status);
+        queryWrapper.eq(ObjectUtils.isNotEmpty(isDownload), "isDownload",isDownload);
+        queryWrapper.eq(ObjectUtils.isNotEmpty(isUpload), "isUpload", isUpload);
+        queryWrapper.eq(ObjectUtils.isNotEmpty(leftNum), "leftNum", leftNum);
+        queryWrapper.eq(ObjectUtils.isNotEmpty(totalNum), "totalNum", totalNum);
         queryWrapper.eq(ObjectUtils.isNotEmpty(method), "method", method);
 
 

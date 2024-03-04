@@ -9,7 +9,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.my.myapicommon.model.User;
 import com.my.springbootinit.common.BaseResponse;
-import com.my.springbootinit.common.ErrorCode;
+import com.my.myapicommon.common.ErrorCode;
 import com.my.springbootinit.exception.BusinessException;
 import com.my.springbootinit.exception.ThrowUtils;
 import com.my.springbootinit.model.vo.LoginUserVO;

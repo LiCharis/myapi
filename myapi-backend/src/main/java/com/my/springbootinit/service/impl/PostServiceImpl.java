@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.my.myapicommon.model.User;
-import com.my.springbootinit.common.ErrorCode;
+import com.my.myapicommon.common.ErrorCode;
 import com.my.springbootinit.constant.CommonConstant;
 import com.my.springbootinit.exception.BusinessException;
 import com.my.springbootinit.exception.ThrowUtils;

@@ -1,7 +1,8 @@
 package com.my.springbootinit.aop;
 
+import com.my.myapicommon.common.ErrorCode;
 import com.my.myapicommon.model.User;
-import com.my.springbootinit.common.ErrorCode;
+import com.my.myapicommon.common.ErrorCode;
 import com.my.springbootinit.common.ResultUtils;
 import com.my.springbootinit.service.UserService;
 import com.my.springbootinit.utils.RequestKeyGenerateUtils;
@@ -30,8 +31,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class IdempotentInterceptor {
 
-    @Resource
-    private RedisTemplate redisTemplate;
 
     @Resource
     private RedissonClient redissonClient;

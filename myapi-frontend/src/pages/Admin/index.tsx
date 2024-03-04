@@ -7,13 +7,13 @@ import {
   onlineInterfaceInfoUsingPost,
   updateInterfaceInfoUsingPost,
 } from '@/services/myapi-backend/interfaceController';
-import { PlusOutlined } from '@ant-design/icons';
-import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
-import { PageContainer, ProDescriptions, ProTable } from '@ant-design/pro-components';
-import { FormattedMessage, useIntl } from '@umijs/max';
+import {PlusOutlined} from '@ant-design/icons';
+import type {ActionType, ProColumns, ProDescriptionsItemProps} from '@ant-design/pro-components';
+import {PageContainer, ProDescriptions, ProTable} from '@ant-design/pro-components';
+import {FormattedMessage, useIntl} from '@umijs/max';
 import {Button, Drawer, message, Popconfirm} from 'antd';
-import { SortOrder } from 'antd/lib/table/interface';
-import React, { useRef, useState } from 'react';
+import {SortOrder} from 'antd/lib/table/interface';
+import React, {useRef, useState} from 'react';
 import UpdateModel from './TableList/components/UpdateModel';
 
 const TableList: React.FC = () => {
@@ -42,7 +42,7 @@ const TableList: React.FC = () => {
   const handleAdd = async (fields: API.InterfaceInfoAddRequest) => {
     const hide = message.loading('正在添加');
     try {
-      const res = await addInterfaceInfoUsingPost({ ...fields });
+      const res = await addInterfaceInfoUsingPost({...fields});
       hide();
       if (res.code === 0) {
         message.success('创建成功');
@@ -53,7 +53,7 @@ const TableList: React.FC = () => {
       return true;
     } catch (error: any) {
       hide();
-      message.error('创建失败' + error.message);
+      message.error('创建失败,' + error.message);
       return false;
     }
   };
@@ -71,7 +71,7 @@ const TableList: React.FC = () => {
       return;
     }
     try {
-      const res = await updateInterfaceInfoUsingPost({ ...fields, id: currentRow.id });
+      const res = await updateInterfaceInfoUsingPost({...fields, id: currentRow.id});
       hide();
       if (res.code === 0) {
         message.success('修改成功');
@@ -82,7 +82,7 @@ const TableList: React.FC = () => {
       return true;
     } catch (error: any) {
       hide();
-      message.error('修改失败' + error.message);
+      message.error('修改失败,' + error.message);
       return false;
     }
   };
@@ -97,18 +97,20 @@ const TableList: React.FC = () => {
     const hide = message.loading('发布中');
     if (!record) return true;
     try {
-      const res = await onlineInterfaceInfoUsingPost({ id: record.id });
+      const res = await onlineInterfaceInfoUsingPost({id: record.id});
       hide();
       if (res.code === 0) {
         message.success('上线成功');
         //重新加载
         actionRef.current?.reload();
+      }else {
+        message.error('上线失败,' + res.message);
       }
 
       return true;
     } catch (error: any) {
       hide();
-      message.error('上线失败' + error.message);
+      message.error('上线失败,' + error.message);
       return false;
     }
   };
@@ -123,18 +125,20 @@ const TableList: React.FC = () => {
     const hide = message.loading('正在下线');
     if (!record) return true;
     try {
-      const res = await offlineInterfaceInfoUsingPost({ id: record.id });
+      const res = await offlineInterfaceInfoUsingPost({id: record.id});
       hide();
       if (res.code === 0) {
         message.success('下线成功');
         //重新加载
         actionRef.current?.reload();
+      }else {
+        message.error('下线失败,' + res.message);
       }
 
       return true;
     } catch (error: any) {
       hide();
-      message.error('下线失败' + error.message);
+      message.error('下线失败,' + error.message);
       return false;
     }
   };
@@ -149,7 +153,7 @@ const TableList: React.FC = () => {
     const hide = message.loading('正在删除');
     if (!record) return true;
     try {
-      const res = await deleteInterfaceInfoUsingPost({ id: record.id });
+      const res = await deleteInterfaceInfoUsingPost({id: record.id});
       hide();
       if (res.code === 0) {
         message.success('删除成功');
@@ -289,6 +293,30 @@ const TableList: React.FC = () => {
       },
     },
     {
+      title: '总调用次数',
+      dataIndex: 'totalNum',
+      valueType: 'text',
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+          },
+        ],
+      },
+    },
+    {
+      title: '剩余调用次数',
+      dataIndex: 'leftNum',
+      valueType: 'text',
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+          },
+        ],
+      },
+    },
+    {
       title: '状态',
       dataIndex: 'status',
       valueEnum: {
@@ -302,6 +330,37 @@ const TableList: React.FC = () => {
         },
       },
     },
+    {
+      title: '是否可下载',
+      dataIndex: 'isDownload',
+      valueEnum: {
+        0: {
+          text: '否',
+          status: 'Default',
+        },
+        1: {
+          text: '是',
+          status: 'Processing',
+        },
+
+      }
+    },
+    {
+      title: '是否可上传',
+      dataIndex: 'isUpload',
+      valueEnum: {
+        0: {
+          text: '否',
+          status: 'Default',
+        },
+        1: {
+          text: '是',
+          status: 'Processing',
+        },
+
+      }
+    },
+
     {
       title: '创建时间',
       dataIndex: 'createTime',
@@ -317,7 +376,7 @@ const TableList: React.FC = () => {
       hideInForm: true,
     },
     {
-      title: <FormattedMessage id="pages.searchTable.titleOption" defaultMessage="Operating" />,
+      title: <FormattedMessage id="pages.searchTable.titleOption" defaultMessage="Operating"/>,
       dataIndex: 'option',
       valueType: 'option',
       render: (_, record) => [
@@ -386,7 +445,7 @@ const TableList: React.FC = () => {
               handleModalOpen(true);
             }}
           >
-            <PlusOutlined /> <FormattedMessage id="pages.searchTable.new" defaultMessage="New" />
+            <PlusOutlined/> <FormattedMessage id="pages.searchTable.new" defaultMessage="New"/>
           </Button>,
         ]}
         /**
@@ -399,11 +458,11 @@ const TableList: React.FC = () => {
           //   current?: number;
           //   keyword?: string;
           // },
-          params:API.InterfaceInfoQueryRequest,
+          params: API.InterfaceInfoQueryRequest,
           sort: Record<string, SortOrder>,
           filter: Record<string, (string | number)[] | null>,
         ) => {
-          const res: any = await listInterfaceInfoVoByPageUsingPost({ ...params,sortField:"createTime" });
+          const res: any = await listInterfaceInfoVoByPageUsingPost({...params, sortField: "createTime"});
           if (res?.data) {
             return {
               data: res.data.records || [],

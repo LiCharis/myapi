@@ -71,6 +71,27 @@ public class InterfaceInfoQueryRequest extends PageRequest implements Serializab
     private String responseHeader;
 
     /**
+     * 接口调用次数
+     */
+    private Integer totalNum;
+
+    /**
+     * 接口剩余次数
+     */
+    private Integer leftNum;
+
+    /**
+     * 是否需要上传文件(0-不需要上传 1-需要上传)
+     */
+    private Integer isUpload;
+
+
+    /**
+     * 是否结果是否可以下载(0-不能 1-可以)
+     */
+    private Integer isDownload;
+
+    /**
      * 接口状态 0-关闭 1-开启
      */
     private Integer status;

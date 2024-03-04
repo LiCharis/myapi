@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.my.myapicommon.model.InterfaceInfo;
 import com.my.myapicommon.model.UserInterfaceInfo;
-import com.my.springbootinit.common.ErrorCode;
+import com.my.myapicommon.common.ErrorCode;
 import com.my.springbootinit.constant.CommonConstant;
 import com.my.springbootinit.exception.BusinessException;
 import com.my.springbootinit.exception.ThrowUtils;
@@ -16,6 +16,7 @@ import com.my.springbootinit.mapper.UserInterfaceInfoMapper;
 import com.my.springbootinit.utils.SqlUtils;
 import org.apache.commons.lang3.ObjectUtils;
 
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,9 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
 
     @Resource
     private InterfaceInfoService interfaceInfoService;
+
+    @Resource
+    private RedisTemplate redisTemplate;
 
     @Override
     public void validUserInterfaceInfo(UserInterfaceInfo userInterfaceInfo, boolean add) {
@@ -134,6 +138,8 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
         if (userId <= 0 || interfaceInfoId <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+
+
         //调用接口后的该用户调用次数变化
         UpdateWrapper<UserInterfaceInfo> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("userId", userId);

@@ -1,19 +1,19 @@
 package com.my.springbootinit;
 
 
-import cn.hutool.json.JSON;
 import cn.hutool.json.JSONUtil;
 import com.my.myapiclientsdk.signUtils.SignUtils;
 import com.my.myapicommon.common.BaseResponse;
+import com.my.myapicommon.common.ErrorCode;
 import com.my.myapicommon.model.InterfaceInfo;
 import com.my.myapicommon.model.User;
 import com.my.myapicommon.model.UserInterfaceInfo;
 import com.my.myapicommon.service.InnerInterfaceInfoService;
+import com.my.myapicommon.service.InnerNonceService;
 import com.my.myapicommon.service.InnerUserInterfaceInfoService;
 import com.my.myapicommon.service.InnerUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
-import org.apache.dubbo.config.annotation.DubboService;
 import org.reactivestreams.Publisher;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -37,6 +37,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 网关全局过滤器
@@ -53,6 +54,9 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
 
     @DubboReference
     InnerUserInterfaceInfoService innerUserInterfaceInfoService;
+
+    @DubboReference
+    InnerNonceService innerNonceService;
 
     private static final List<String> WHITE_LIST = Collections.singletonList("127.0.0.1");
 
@@ -84,7 +88,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
          */
         if (!WHITE_LIST.contains(hostString)) {
             //禁止访问
-            return handleNoAuth(response, "您已被列入黑名单，禁止调用");
+            return handleNoAuth(response, ErrorCode.BLACK_LIST_ERROR);
         }
 
         /**
@@ -95,7 +99,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         String accessKey = headers.getFirst("accessKey");
         String body = null;
         try {
-            body = URLDecoder.decode(headers.getFirst("body"),"utf-8");
+            body = URLDecoder.decode(headers.getFirst("body"), "utf-8");
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -109,18 +113,9 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
             invokeUser = innerUserService.getInvokeUser(accessKey);
         } catch (Exception e) {
             log.error("getInvokeUser error,user do not exist");
-            return handleNoAuth(response, "您的accessKey错误，请联系管理员处理");
+            return handleNoAuth(response, ErrorCode.ACCESS_KEY_ERROR);
         }
 
-
-        /**
-         * 检查随机数，防止出现请求重发(每次用户请求携带的随机数都不一样，服务端要做校验，确保是有效的随机数)
-         * todo 这里为了跑通流程先做粗略测试
-         */
-        if (Long.parseLong(nonce) > 10000) {
-            //禁止访问
-            return handleNoAuth(response, "请求随机数错误");
-        }
 
         /**
          **这里可以检查当前时间与请求携带的时间戳之间的间隔时间
@@ -128,7 +123,16 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
          */
         if ((System.currentTimeMillis() / 1000 - Long.parseLong(timeStamp)) > 60 * 5) {
             //禁止访问
-            return handleNoAuth(response, "调用超时");
+            return handleNoAuth(response, ErrorCode.INVOKE_TIMEOUT);
+        }
+
+        /**
+         * 检查随机数，防止出现请求重发(每次用户请求携带的随机数都不一样，服务端要做校验，确保是有效的随机数)
+         * 这里考虑首先从redis里面查询该随机数是否存在，若不存在，则将随机数放入到redis中，5分钟过期,如果存在，则认为是重放攻击，拒绝调用
+         */
+        if (!innerNonceService.nonceJudge(nonce)) {
+            //禁止访问
+            return handleNoAuth(response, ErrorCode.RANDOM_NUMBER_ERROR);
         }
 
         //这里的secretKey肯定是得从数据库中获取的
@@ -136,7 +140,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         String sign = SignUtils.getSign(body, secretKey);
         if (!sign.equals(headerSign) || sign == null) {
             //禁止访问
-            return handleNoAuth(response, "接口调用认证失败,请联系管理员处理");
+            return handleNoAuth(response, ErrorCode.SECRET_KEY_ERROR);
         }
 //        /**
 //         * 4.判断接口是否存在
@@ -154,8 +158,8 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         long interfaceInfoId = Long.parseLong(interfaceInfoId1);
 
         InterfaceInfo interfaceInfo = innerInterfaceInfoService.getInterfaceInfo(interfaceInfoId);
-        if (interfaceInfo.getLeftNum() <= 0){
-            return handleNoAuth(response, "该接口的总剩余调用次数已用尽");
+        if (interfaceInfo.getLeftNum() <= 0) {
+            return handleNoAuth(response, ErrorCode.INTERFACE_LEFTNUM_RUNOUT);
         }
 
 
@@ -164,7 +168,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
          */
         UserInterfaceInfo userInterfaceInfo = innerUserInterfaceInfoService.getUserInterfaceInfo(userId, interfaceInfoId);
         if (userInterfaceInfo.getLeftNum() <= 0) {
-            return handleNoAuth(response, "您对于该接口的剩余调用次数已用尽");
+            return handleNoAuth(response, ErrorCode.USER_INTERFACE_LEFTNUM_RUNOUT);
         }
 
 
@@ -203,13 +207,13 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
      * @param response
      * @return
      */
-    public Mono<Void> handleNoAuth(ServerHttpResponse response, String message) {
+    public Mono<Void> handleNoAuth(ServerHttpResponse response, ErrorCode errorCode) {
 
 
         response.setStatusCode(HttpStatus.FORBIDDEN);
-        BaseResponse<String> noAuth = new BaseResponse<>(40300, "NO_AUTH", message);
-        String jsonStr = JSONUtil.toJsonStr(noAuth);
-        DataBuffer dataBuffer = response.bufferFactory().wrap(jsonStr.getBytes(StandardCharsets.UTF_8));
+//        BaseResponse<String> noAuth = new BaseResponse<>(40300, "NO_AUTH", message);
+//        String jsonStr = JSONUtil.toJsonStr(noAuth);
+        DataBuffer dataBuffer = response.bufferFactory().wrap(errorCode.getMessage().getBytes(StandardCharsets.UTF_8));
 
         return response.writeWith(Mono.just(dataBuffer));
     }
@@ -251,6 +255,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
                     @Override
                     public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
                         //log.info("body instanceof Flux: {}", (body instanceof Flux));
+                        AtomicReference<DataBuffer> dataBuffer1 = null;
                         if (body instanceof Flux) {
                             Flux<? extends DataBuffer> fluxBody = Flux.from(body);
                             //往返回值里面写数据
@@ -282,6 +287,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
                         } else {
                             log.error("<--- {} 响应code异常", getStatusCode());
                         }
+
                         return super.writeWith(body);
                     }
                 };
@@ -291,6 +297,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         } catch (Exception e) {
             log.info("invoke interface error");
             log.error("gateway log exception.\n" + e);
+            handleNoAuth(exchange.getResponse(), ErrorCode.SYSTEM_ERROR);
             return chain.filter(exchange);
         }
     }

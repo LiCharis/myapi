@@ -6,7 +6,7 @@ import com.my.myapicommon.model.InterfaceInfo;
 import com.my.myapicommon.model.UserInterfaceInfo;
 import com.my.springbootinit.annotation.AuthCheck;
 import com.my.springbootinit.common.BaseResponse;
-import com.my.springbootinit.common.ErrorCode;
+import com.my.myapicommon.common.ErrorCode;
 import com.my.springbootinit.common.ResultUtils;
 import com.my.springbootinit.exception.BusinessException;
 import com.my.springbootinit.mapper.InterfaceInfoMapper;

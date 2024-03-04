@@ -2,7 +2,7 @@ package com.my.springbootinit.controller;
 
 import com.my.myapicommon.model.User;
 import com.my.springbootinit.common.BaseResponse;
-import com.my.springbootinit.common.ErrorCode;
+import com.my.myapicommon.common.ErrorCode;
 import com.my.springbootinit.common.ResultUtils;
 import com.my.springbootinit.exception.BusinessException;
 import com.my.springbootinit.model.dto.postthumb.PostThumbAddRequest;

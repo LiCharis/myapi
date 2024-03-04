@@ -46,17 +46,18 @@ public class MyApiClient {
 
 
     /**
-     * 传递想问的问题，API调用返回结果
+     * 传递想问的问题，Qwen回答问题
      * @param input
      * @return
      */
-    public String generateByAPI(String input){
-        HttpResponse httpResponse = HttpRequest.post(GATEWAY_HOST + "/chart/generateByAPI")
+    public String chatByQwenAPI(String input){
+        HttpResponse httpResponse = HttpRequest.post(GATEWAY_HOST + "/chat/chatByQwenAPI")
                 .form("input",input)
                 .addHeaders(getHeaders(input))
                 .execute();
         return httpResponse.body();
     }
+
 
 
     /**
@@ -83,16 +84,18 @@ public class MyApiClient {
         String name = chartByAiRequest.getName();
         String goal = chartByAiRequest.getGoal();
         String chartType = chartByAiRequest.getChartType();
+        String strategy = chartByAiRequest.getStrategy();
 
         HttpResponse httpResponse = null;
         try {
-            httpResponse = HttpUtil.createPost(GATEWAY_HOST + "/chart/generate")
+            httpResponse = HttpUtil.createPost(GATEWAY_HOST + "/chart/generateByAPI")
                     .addHeaders(getHeaders(genChartByAiRequest))
                     .header("Content-Type", "multipart/form-data")
                     .form("file", file)
                     .form("name", name)
                     .form("goal", goal)
                     .form("chartType", chartType)
+                    .form("strategy",strategy)
                     .execute();
 
         } catch (Exception e) {

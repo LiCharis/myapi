@@ -160,6 +160,8 @@ declare namespace API {
     isDelete?: number;
     isDownload?: number;
     isUpload?: number;
+    leftNum?: number;
+    totalNum?: number;
     method?: string;
     name?: string;
     parameterType?: string;
@@ -185,6 +187,10 @@ declare namespace API {
     requestHeader?: string;
     responseHeader?: string;
     userId?: string;
+    isDownload?: number;
+    isUpload?: number;
+    leftNum?: number;
+    totalNum?: number;
   };
 
   type InterfaceInfoQueryRequest = {
@@ -193,6 +199,10 @@ declare namespace API {
     host?: string;
     id?: string;
     method?: string;
+    isDownload?: number;
+    isUpload?: number;
+    leftNum?: number;
+    totalNum?: number;
     name?: string;
     pageSize?: string;
     parameterType?: string;
@@ -220,6 +230,10 @@ declare namespace API {
     requestHeader?: string;
     responseHeader?: string;
     status?: number;
+    isDownload?: number;
+    isUpload?: number;
+    leftNum?: number;
+    totalNum?: number;
   };
 
   type InterfaceInfoVO = {

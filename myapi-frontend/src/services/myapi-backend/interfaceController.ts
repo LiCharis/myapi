@@ -95,7 +95,6 @@ export async function invokeInterfaceInfoUsingPost(
 
   return request<Record<string, any>>('/api/interfaceInfo/invoke', {
     method: 'POST',
-    // headers:{"requestId":uuid.v4()},
     params: {
       ...params,
     },

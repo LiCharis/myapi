@@ -1,6 +1,7 @@
 package com.my.springbootinit.exception;
 
-import com.my.springbootinit.common.ErrorCode;
+
+import com.my.myapicommon.common.ErrorCode;
 
 /**
  * 自定义异常类

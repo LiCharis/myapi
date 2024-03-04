@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.my.myapicommon.model.User;
 import com.my.myapicommon.service.InnerUserService;
-import com.my.springbootinit.common.ErrorCode;
+import com.my.myapicommon.common.ErrorCode;
 import com.my.springbootinit.constant.CommonConstant;
 import com.my.springbootinit.exception.BusinessException;
 import com.my.springbootinit.mapper.UserMapper;

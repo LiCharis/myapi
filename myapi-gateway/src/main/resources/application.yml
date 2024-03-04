@@ -9,23 +9,30 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: test_route
-          uri: http://localhost:8123/api
-          predicates:
-            - Path=/api/name/**
         - id: model_route
-          uri: http://localhost:8000/task
+          uri: http://101.43.233.52:8000/api/task/model
           predicates:
             - Path=/api/task/**
         - id: BI_route
-          uri: http://localhost:8125/api/chart
+          uri: http://101.43.233.52:8125/api/chart/generateByAPI
           predicates:
             - Path=/api/chart/**
 
-        - id: QA_route
-          uri: http://localhost:8001/api/qasystem
+        - id: chat_route
+          uri: http://101.201.81.126:8000/api/qasystem/getRes
           predicates:
             - Path=/api/qasystem/**
+
+
+        - id: Qwen_route
+          uri: http://101.43.233.52:8000
+          predicates:
+            - Path=/api/chat/**
+          filters:
+            - RewritePath=/api/chat/(?<segment>.*), /api/task/$\{segment}
+
+
+
 
 
 

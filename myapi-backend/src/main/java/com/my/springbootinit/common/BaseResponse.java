@@ -1,6 +1,8 @@
 package com.my.springbootinit.common;
 
 import java.io.Serializable;
+
+import com.my.myapicommon.common.ErrorCode;
 import lombok.Data;
 
 /**

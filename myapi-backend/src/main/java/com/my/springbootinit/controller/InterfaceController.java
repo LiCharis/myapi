@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 import com.my.myapiclientsdk.client.MyApiClient;
 import com.my.myapiclientsdk.model.ModelInterfaceInfo;
+import com.my.myapicommon.common.ErrorCode;
 import com.my.myapicommon.model.InterfaceInfo;
 import com.my.myapicommon.model.User;
 import com.my.springbootinit.annotation.AuthCheck;
@@ -32,8 +33,10 @@ import com.my.springbootinit.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -50,6 +53,7 @@ import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -60,7 +64,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/interfaceInfo")
 @Slf4j
-public class InterfaceController {
+public class InterfaceController implements InitializingBean {
 
     @Resource
     private InterfaceInfoService interfaceInfoService;
@@ -78,7 +82,15 @@ public class InterfaceController {
     private RedisLimiterManager redisLimiterManager;
 
     @Resource
+    private RedisTemplate redisTemplate;
+
+    @Resource
     private ModelInterfaceInfoService modelInterfaceInfoService;
+
+    /**
+     * 管理接口次数是否用尽的map
+     */
+    private HashMap<Long,Boolean> interfaceInfoLeftNumMap = new HashMap<>();
 
     /**
      * 保存的文件路径
@@ -112,6 +124,12 @@ public class InterfaceController {
         boolean result = interfaceInfoService.save(interfaceInfo);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         long newInterfaceInfoId = interfaceInfo.getId();
+
+        //将新接口的剩余调用次数加入到redis
+        redisTemplate.opsForValue().set("invoke" + interfaceInfo.getId(),interfaceInfo.getLeftNum());
+        //初始化map,true代表有剩余，false代表无剩余
+        interfaceInfoLeftNumMap.put(interfaceInfo.getId(), true);
+
         return ResultUtils.success(newInterfaceInfoId);
     }
 
@@ -138,6 +156,17 @@ public class InterfaceController {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = interfaceInfoService.removeById(id);
+        if (!b){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"删除接口失败");
+        }
+
+        //将redis里面对应的接口剩余次数删除
+        Object andDelete = redisTemplate.opsForValue().getAndDelete("invoke" + oldInterfaceInfo.getId());
+        if (andDelete == null){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"删除接口redis信息失败");
+        }
+        //初始化map,true代表有剩余，false代表无剩余
+        interfaceInfoLeftNumMap.remove(oldInterfaceInfo.getId());
         return ResultUtils.success(b);
     }
 
@@ -163,6 +192,16 @@ public class InterfaceController {
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
         ThrowUtils.throwIf(oldInterfaceInfo == null, ErrorCode.NOT_FOUND_ERROR);
         boolean result = interfaceInfoService.updateById(interfaceInfo);
+        if (!result){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"接口更新失败");
+        }
+        //对redis里的接口剩余次数进行更新
+        redisTemplate.opsForValue().set("invoke" + interfaceInfo.getId(),interfaceInfo.getLeftNum());
+        //初始化map,true代表有剩余，false代表无剩余
+        if (interfaceInfo.getLeftNum() <= 0){
+            interfaceInfoLeftNumMap.put(interfaceInfo.getId(), false);
+        }
+
         return ResultUtils.success(result);
     }
 
@@ -187,7 +226,12 @@ public class InterfaceController {
         com.my.myapiclientsdk.model.User user = new com.my.myapiclientsdk.model.User();
         String jsonStr = JSONUtil.toJsonStr(user);
         user.setUsername("test");
-        String content = myApiClient.getUserNameByPost(jsonStr);
+        String content = null;
+        try {
+            content = myApiClient.getUserNameByPost(jsonStr);
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口状态异常");
+        }
         if (StringUtils.isBlank(content)) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口状态异常");
         }
@@ -262,11 +306,10 @@ public class InterfaceController {
     @PostMapping("/invoke")
     @AuthCheck(mustRole = UserConstant.DEFAULT_ROLE)
     @IdempotentCheck(prefix = "invoke")
-    public Object invokeInterfaceInfo(@RequestPart(name = "file", required = false) MultipartFile multipartFile,InterfaceInfoInvokeRequest interfaceInfoInvokeRequest, HttpServletRequest request) throws NoSuchFieldException, IOException {
+    public BaseResponse invokeInterfaceInfo(@RequestPart(name = "file", required = false) MultipartFile multipartFile, InterfaceInfoInvokeRequest interfaceInfoInvokeRequest, HttpServletRequest request) throws NoSuchFieldException, IOException {
         if (interfaceInfoInvokeRequest == null || interfaceInfoInvokeRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-
 
 
 
@@ -274,6 +317,10 @@ public class InterfaceController {
         Long id = interfaceInfoInvokeRequest.getId();
         Long userId = interfaceInfoInvokeRequest.getUserId();
         String requestBody = interfaceInfoInvokeRequest.getUserRequestBody();
+
+        if (StringUtils.isBlank(requestBody)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"请求参数不能为空");
+        }
 
         /**
          * 对用户做限流,及针对某用户对调用AI请求做出限制
@@ -293,6 +340,22 @@ public class InterfaceController {
         if (oldInterfaceInfo.getStatus() == 0) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口已关闭");
         }
+
+        //根据map判断接口剩余次数是否用尽
+        if (!interfaceInfoLeftNumMap.get(id)){
+            throw new BusinessException(ErrorCode.INTERFACE_LEFTNUM_RUNOUT);
+        }
+
+
+        //判断对应接口的剩余次数是否已用尽
+        //redis预减操作，减少db压力
+        Long decrement = redisTemplate.opsForValue().decrement("invoke" + id);
+        if (decrement <= 0){
+            //接口调用次数已用尽
+            interfaceInfoLeftNumMap.put(id,false);
+            throw new BusinessException(ErrorCode.INTERFACE_LEFTNUM_RUNOUT);
+        }
+
         User loginUser = userService.getLoginUser(request);
         String accessKey = loginUser.getAccessKey();
         String secretKey = loginUser.getSecretKey();
@@ -360,7 +423,14 @@ public class InterfaceController {
          * 这样不仅统一格式，前端也好统一去取数据呈现。（1.5h）
          */
 
-        return result;
+
+        //说明是返回错误信息
+        ErrorCode errorCode = ErrorCode.getEnumByMessage((String) result);
+        if (errorCode != null){
+            return ResultUtils.error(errorCode);
+        }
+        //否则就是正常调用返回
+        return ResultUtils.success(result);
     }
 
 
@@ -424,4 +494,19 @@ public class InterfaceController {
     }
 
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        List<InterfaceInfo> interfaceInfos = interfaceInfoService.list();
+        if (interfaceInfos.isEmpty()){
+            return;
+        }
+        /**
+         * 将所有的接口的剩余调用次数放到redis中
+         */
+        interfaceInfos.forEach(interfaceInfo -> {
+            redisTemplate.opsForValue().set("invoke" + interfaceInfo.getId(),interfaceInfo.getLeftNum());
+            //初始化map,true代表有剩余，false代表无剩余
+            interfaceInfoLeftNumMap.put(interfaceInfo.getId(), true);
+        });
+    }
 }

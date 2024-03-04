@@ -1,6 +1,7 @@
 com\my\myapicommon\constant\CommonConstant.class
 com\my\myapicommon\common\ResultUtils.class
 com\my\myapicommon\common\IdRequest.class
+com\my\myapicommon\service\InnerNonceService.class
 com\my\myapicommon\common\PageRequest.class
 com\my\myapicommon\model\InterfaceInfo.class
 com\my\myapicommon\model\User.class

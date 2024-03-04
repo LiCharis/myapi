@@ -4,7 +4,7 @@ package com.my.springbootinit.service.impl.inner;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.my.myapicommon.model.InterfaceInfo;
 import com.my.myapicommon.service.InnerInterfaceInfoService;
-import com.my.springbootinit.common.ErrorCode;
+import com.my.myapicommon.common.ErrorCode;
 
 import com.my.springbootinit.exception.BusinessException;
 

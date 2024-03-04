@@ -16,7 +16,7 @@ public class InterfaceInfoInvokeRequest implements Serializable {
     /**
      * 接口id
      */
-    //加入自定义注解，表示该字段需要鉴定是否是
+    //加入自定义注解，表示该字段需要鉴定是否是重复请求
     @RequestKeyParam
     private Long id;
 

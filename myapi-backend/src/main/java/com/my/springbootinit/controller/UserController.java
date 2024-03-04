@@ -4,6 +4,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.my.myapicommon.common.ErrorCode;
 import com.my.myapicommon.model.User;
 import com.my.springbootinit.annotation.AuthCheck;
 import com.my.springbootinit.common.*;
