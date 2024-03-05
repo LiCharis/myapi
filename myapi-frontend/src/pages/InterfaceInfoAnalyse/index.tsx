@@ -40,7 +40,7 @@ const InterfaceInfoAnalyse: React.FC = () => {
 
   const pie = {
     title: {
-      text: '调用次数前三的接口',
+      text: '调用次数前五的接口',
       left: 'center',
     },
     tooltip: {

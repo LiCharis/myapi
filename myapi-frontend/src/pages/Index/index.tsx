@@ -42,11 +42,12 @@ const Index: React.FC = () => {
         itemLayout="horizontal"
         dataSource={list}
         renderItem={(item) => {
-          const apiLink = item.status == 1 ? `/interface_info/${item.id}` : "#";
+          const apiLink = item.status == 1 ? `/interface_info/${item.id}` : "javascript:alert('接口不可用')";
+          const color = item.status == 1 ? 'blue' : 'grey';
           return (
-            <List.Item actions={[<h3 key={item.id} >{item.status?"可用":"不可用"}</h3>]}>
+            <List.Item >
               <List.Item.Meta
-                title={<h2><a href={apiLink}> {item.name}</a></h2>}
+                title={<h2><a style={{color:color}} href={apiLink}> {item.name}</a></h2>}
                 description={<h3>{item.description}</h3>}
               />
             </List.Item>

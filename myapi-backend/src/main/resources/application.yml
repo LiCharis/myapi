@@ -22,7 +22,7 @@ spring:
   # todo 需替换配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/myapi
+    url: jdbc:mysql://101.43.233.52:3306/myapi
     username: root
     password: 123456
   # Redis 配置
@@ -104,7 +104,7 @@ dubbo:
     port: -1
   registry:
     id: nacos-registry
-    address: nacos://localhost:8848
+    address: nacos://101.201.81.126:8848
 
 #第三方登录(gitee)
 gitee:

@@ -3,6 +3,7 @@ package com.my.springbootinit.controller;
 import cn.hutool.json.JSON;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
@@ -11,6 +12,7 @@ import com.my.myapiclientsdk.model.ModelInterfaceInfo;
 import com.my.myapicommon.common.ErrorCode;
 import com.my.myapicommon.model.InterfaceInfo;
 import com.my.myapicommon.model.User;
+import com.my.myapicommon.model.UserInterfaceInfo;
 import com.my.springbootinit.annotation.AuthCheck;
 import com.my.springbootinit.annotation.IdempotentCheck;
 import com.my.springbootinit.common.*;
@@ -29,6 +31,7 @@ import com.my.springbootinit.model.dto.intefaceInfo.InterfaceInfoUpdateRequest;
 import com.my.springbootinit.model.enums.ClassEnum;
 import com.my.springbootinit.service.InterfaceInfoService;
 import com.my.springbootinit.service.ModelInterfaceInfoService;
+import com.my.springbootinit.service.UserInterfaceInfoService;
 import com.my.springbootinit.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -55,6 +58,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 帖子接口
@@ -70,13 +74,13 @@ public class InterfaceController implements InitializingBean {
     private InterfaceInfoService interfaceInfoService;
 
     @Resource
+    private UserInterfaceInfoService userInterfaceInfoService;
+
+    @Resource
     private UserService userService;
 
     @Resource
     private MyApiClient myApiClient;
-
-    @Resource
-    private ModelInterfaceInfoMapper modelInterfaceInfoMapper;
 
     @Resource
     private RedisLimiterManager redisLimiterManager;
@@ -160,6 +164,11 @@ public class InterfaceController implements InitializingBean {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"删除接口失败");
         }
 
+        //也将用户调用接口信息表中对应的接口删除
+        QueryWrapper<UserInterfaceInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("interfaceInfoId",id);
+        boolean remove = userInterfaceInfoService.remove(queryWrapper);
+
         //将redis里面对应的接口剩余次数删除
         Object andDelete = redisTemplate.opsForValue().getAndDelete("invoke" + oldInterfaceInfo.getId());
         if (andDelete == null){
@@ -195,6 +204,12 @@ public class InterfaceController implements InitializingBean {
         if (!result){
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"接口更新失败");
         }
+
+        //修改用户调用接口信息
+        if (!Objects.equals(interfaceInfo.getStatus(), oldInterfaceInfo.getStatus())){
+            boolean update = userInterfaceInfoService.update(new UpdateWrapper<UserInterfaceInfo>().eq("interfaceInfo", id).set("status", interfaceInfo.getStatus()));
+        }
+
         //对redis里的接口剩余次数进行更新
         redisTemplate.opsForValue().set("invoke" + interfaceInfo.getId(),interfaceInfo.getLeftNum());
         //初始化map,true代表有剩余，false代表无剩余
@@ -241,6 +256,11 @@ public class InterfaceController implements InitializingBean {
         interfaceInfo.setStatus(1);
 
         boolean result = interfaceInfoService.updateById(interfaceInfo);
+
+        UpdateWrapper<UserInterfaceInfo> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("interfaceInfoId",id).set("status",1);
+        boolean update = userInterfaceInfoService.update(updateWrapper);
+
         return ResultUtils.success(result);
     }
 
@@ -267,6 +287,11 @@ public class InterfaceController implements InitializingBean {
         interfaceInfo.setStatus(0);
 
         boolean result = interfaceInfoService.updateById(interfaceInfo);
+        //对应所有用户调用表中的相关接口状态也设置成0
+        UpdateWrapper<UserInterfaceInfo> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("interfaceInfoId",id).set("status",0);
+        boolean update = userInterfaceInfoService.update(updateWrapper);
+
         return ResultUtils.success(result);
     }
 
@@ -413,6 +438,7 @@ public class InterfaceController implements InitializingBean {
 
         } catch (Exception e) {
             e.printStackTrace();
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,e.getMessage());
         }
 //        String userNameByPost = myApiClientTemp.getUserNameByPost(user);
         /**

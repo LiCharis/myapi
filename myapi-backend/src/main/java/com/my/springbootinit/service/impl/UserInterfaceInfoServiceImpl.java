@@ -116,6 +116,7 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
             userInterfaceInfo.setTotalNum(0);
             userInterfaceInfo.setLeftNum(20);
             userInterfaceInfo.setName(name);
+            userInterfaceInfo.setStatus(1);
             boolean save = this.save(userInterfaceInfo);
             if (!save) {
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR, "插入调用记录失败");

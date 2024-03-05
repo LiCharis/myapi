@@ -46,7 +46,8 @@ const PersonalInvoke: React.FC = () => {
         itemLayout="horizontal"
         dataSource={list}
         renderItem={(item) => {
-          const apiLink = `/interface_info/${item.interfaceInfoId}`;
+          const apiLink = item.status == 1 ? `/interface_info/${item.interfaceInfoId}` : "javascript:alert('接口不可用')";
+          const color = item.status == 1 ? 'blue' : 'grey';
           return (
             <List.Item
               actions={[
@@ -56,11 +57,14 @@ const PersonalInvoke: React.FC = () => {
               <List.Item.Meta
                 title={
                   <h2>
-                    <a href={apiLink}> {item.name}</a>
+                    <a style={{color:color}} href={apiLink}> {item.name}</a>
                   </h2>
                 }
                 description={
-                  <h3>{'已调用次数:' + item.totalNum + ' 剩余次数: ' + item.leftNum}</h3>
+                <>
+                  <h3 style={{color:'#434343'}}>{'已调用次数: ' + item.totalNum}</h3>
+                  <h3 style={{color:'#434343'}}>{'剩余次数: ' + item.leftNum}</h3>
+                </>
                 }
               />
             </List.Item>
