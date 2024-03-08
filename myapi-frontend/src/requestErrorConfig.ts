@@ -25,7 +25,8 @@ interface ResponseStructure {
  * @doc https://umijs.org/docs/max/request#配置
  */
 export const errorConfig: RequestConfig = {
-  baseURL: 'http://localhost:8101',
+  // baseURL: 'http://8.140.56.57:8101',
+  // baseURL: 'http://127.0.0.1:8101',
   //携带cookies
   withCredentials: true,
   // timeout: 5000,

@@ -11,7 +11,7 @@ import {FormattedMessage, Helmet, history, SelectLang, useIntl, useModel} from '
 import {Alert, Button, Checkbox, Form, message, Tabs} from 'antd';
 import React, {useState} from 'react';
 import Settings from '../../../../config/defaultSettings';
-import { Oauth } from "@/components/3thLogin";
+import {Oauth} from "@/components/3thLogin";
 import {CustomIconComponentProps} from "@ant-design/icons/es/components/Icon";
 
 
@@ -33,10 +33,6 @@ const githubSvg = () => (
       fill="" p-id="5720"></path>
   </svg>
 )
-
-const GiteeIcon = (props: Partial<CustomIconComponentProps>) => (
-  <Icon component={giteeSvg} {...props} />
-);
 
 const ActionIcons = () => {
 
@@ -123,45 +119,67 @@ const Login: React.FC = () => {
 
   const intl = useIntl();
 
-  /**
-   * 第三方登录
-   */
-  const checkLogin3rd = async () => {
-    const code = urlParams.get('code');
-    if (code === '200') {
-      const state = localStorage.getItem('login_state') || '';
-      try {
-        const res = await getLoginUserUsingGet();
-        // console.log('params', params);
-        if (res.code === 0) {
-          const defaultLoginSuccessMessage = intl.formatMessage({
-            id: 'pages.login.success',
-            defaultMessage: '登录成功！',
-          });
-          /**
-           * 设置当前登陆状态
-           */
-          setInitialState({
-            loginUser: res.data,
-          });
-          message.success(defaultLoginSuccessMessage);
-          const urlParams = new URL(window.location.href).searchParams;
-
-          history.push(urlParams.get('redirect') || '/');
-          return;
-        } else {
-          message.error(res.message);
-        }
-      } catch (error: any) {
-        message.error(error.message);
-      }
-
-    }else if (code === '500'){
-      message.error("第三方授权登录失败");
-    }
-  }
-
-  checkLogin3rd()
+  // /**
+  //  * 第三方登录
+  //  */
+  // const checkLogin3rd = async () => {
+  //   const state = localStorage.getItem('login_state') || '';
+  //   if (state === 'GITEE') {
+  //     const accessToken = urlParams.get('access_token');
+  //     console.log("access_token",accessToken);
+  //
+  //     const userObj = await fetch(
+  //       'https://gitee.com/api/v5/user?access_token=' + accessToken,
+  //       {
+  //         method: 'GET',
+  //       },
+  //     );
+  //     const userInfo: any = userObj.json();
+  //     const name: string = userInfo?.name;
+  //     const avatar_url: string = userInfo?.avatar_url;
+  //
+  //     try {
+  //       const response = await fetch(
+  //         '/api/login3rd/login',
+  //         {
+  //           method: 'POST',
+  //           headers: {
+  //             'Content-Type': 'application/json',
+  //           },
+  //           body: JSON.stringify({name: name, avatar_url: avatar_url}),
+  //         },
+  //       );
+  //
+  //       const res: any = response.json();
+  //
+  //       // console.log('params', params);
+  //       if (res.code === 0) {
+  //         const defaultLoginSuccessMessage = intl.formatMessage({
+  //           id: 'pages.login.success',
+  //           defaultMessage: '登录成功！',
+  //         });
+  //         /**
+  //          * 设置当前登陆状态
+  //          */
+  //         setInitialState({
+  //           loginUser: res.data,
+  //         });
+  //         message.success(defaultLoginSuccessMessage);
+  //         const urlParams = new URL(window.location.href).searchParams;
+  //
+  //         history.push(urlParams.get('redirect') || '/');
+  //         return;
+  //       } else {
+  //         message.error(res.message);
+  //       }
+  //     } catch (error: any) {
+  //       message.error(error.message);
+  //     }
+  //   }
+  //
+  // }
+  //
+  // checkLogin3rd()
 
 
   const handleSubmit = async (values: API.UserLoginRequest) => {
@@ -182,10 +200,10 @@ const Login: React.FC = () => {
         message.success(defaultLoginSuccessMessage);
         const urlParams = new URL(window.location.href).searchParams;
 
-        history.push(urlParams.get('redirect') || '/');
+        history.push(urlParams.get('redirect') || '/index');
 
         return;
-      }else {
+      } else {
         message.error(res.message);
       }
       console.log(res);

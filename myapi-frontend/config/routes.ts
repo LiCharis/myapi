@@ -1,5 +1,5 @@
 ﻿export default [
-  { path: '/', name: '接口信息', icon: 'smile', component: './Index' },
+  { path: '/index', name: '接口信息', icon: 'smile', component: './Index' },
   {
     path: '/interface_info/:id',
     name: '接口信息信息',
@@ -10,7 +10,7 @@
   {
     path: '/user',
     layout: false,
-    routes: [{ path: '/user/login', component: './User/Login' },{ path: '/user/register', component: './User/Register' }],
+    routes: [{ path: '/user/login', component: './User/Login' },{ path: '/user/register', component: './User/Register' },{ path: '/user/thirdLogin', component: './User/ThirdLogin' }],
   },
   {
     path: '/admin',

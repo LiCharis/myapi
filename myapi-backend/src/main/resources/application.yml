@@ -22,7 +22,7 @@ spring:
   # todo 需替换配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://101.43.233.52:3306/myapi
+    url: jdbc:mysql://101.43.233.52:3310/myapi
     username: root
     password: 123456
   # Redis 配置
@@ -111,7 +111,7 @@ gitee:
   clientId: 27853d6fc405e7f3f1be5710672a70845e0981ba516a61dde76bb6340773b677
   clientSecret: 1bc491a2f5e98d69dcb44a47eac2bc413ac221708d1662398636c121b1a0b941
   state: GITEE
-  redirectUri: http://localhost:8101/api/login3rd/gitee/callback
+  redirectUri: http://8.140.56.57:8101/api/login3rd/gitee/callback
   token:
     url: https://gitee.com/oauth/token?grant_type=authorization_code&client_id=${gitee.clientId}&redirect_uri=${gitee.redirectUri}&client_secret=${gitee.clientSecret}&code=
   user:
@@ -122,9 +122,9 @@ gitee:
 #第三方登录(github)
 github:
   clientId: 81281fded19e878ed5f1
-  clientSecret: 4b7903ab4584b470a8bfaf0c8288f3cb2840eca8
+  clientSecret: e6a0ffb67943847456221eca1c6160212b49c18e
   state: GITHUB
-  redirectUri: http://localhost:8101/api/login3rd/github/callback
+  redirectUri: http://8.140.56.57:8101/api/login3rd/github/callback
   token:
     url:  https://github.com/login/oauth/access_token?client_id=${github.clientId}&redirect_uri=${github.redirectUri}&client_secret=${github.clientSecret}&code=
   user:

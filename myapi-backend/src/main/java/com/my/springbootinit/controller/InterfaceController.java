@@ -237,19 +237,7 @@ public class InterfaceController implements InitializingBean {
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
         ThrowUtils.throwIf(oldInterfaceInfo == null, ErrorCode.NOT_FOUND_ERROR);
 
-        //判断接口是否可用
-        com.my.myapiclientsdk.model.User user = new com.my.myapiclientsdk.model.User();
-        String jsonStr = JSONUtil.toJsonStr(user);
-        user.setUsername("test");
-        String content = null;
-        try {
-            content = myApiClient.getUserNameByPost(jsonStr);
-        } catch (Exception e) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口状态异常");
-        }
-        if (StringUtils.isBlank(content)) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口状态异常");
-        }
+
         //进管理员可更改接口状态
         InterfaceInfo interfaceInfo = new InterfaceInfo();
         interfaceInfo.setId(id);
@@ -366,6 +354,10 @@ public class InterfaceController implements InitializingBean {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口已关闭");
         }
 
+        if (interfaceInfoLeftNumMap.get(id) == null){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"该接口不存在或不能在数据库中添加数据");
+        }
+
         //根据map判断接口剩余次数是否用尽
         if (!interfaceInfoLeftNumMap.get(id)){
             throw new BusinessException(ErrorCode.INTERFACE_LEFTNUM_RUNOUT);
@@ -438,7 +430,7 @@ public class InterfaceController implements InitializingBean {
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR,e.getMessage());
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"网关错误");
         }
 //        String userNameByPost = myApiClientTemp.getUserNameByPost(user);
         /**

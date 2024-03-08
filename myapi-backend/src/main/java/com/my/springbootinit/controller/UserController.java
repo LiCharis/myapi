@@ -39,8 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 用户接口
- *
- 
  */
 @RestController
 @RequestMapping("/user")
@@ -98,6 +96,8 @@ public class UserController {
         LoginUserVO loginUserVO = userService.userLogin(userAccount, userPassword, request);
         return ResultUtils.success(loginUserVO);
     }
+
+
 
     /**
      * 用户注销

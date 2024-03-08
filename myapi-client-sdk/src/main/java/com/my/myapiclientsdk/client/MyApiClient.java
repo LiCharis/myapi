@@ -203,6 +203,18 @@ public class MyApiClient {
     }
 
 
+    public String calculator(String expression){
+        HttpResponse result = HttpUtil.createPost(GATEWAY_HOST + "/chat/calculate")
+                .form("expression", expression)
+                .addHeaders(getHeaders(expression))
+                .execute();
+
+
+        System.out.println(result.body());
+        return result.body();
+    }
+
+
     private HashMap<String, String> getHeaders(String body) {
         HashMap<String, String> headers = new HashMap<>();
         headers.put("interfaceInfoId", String.valueOf(interfaceInfoId));
