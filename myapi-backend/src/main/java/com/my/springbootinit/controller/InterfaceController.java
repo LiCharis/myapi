@@ -58,12 +58,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
  * 帖子接口
- *
- 
  */
 @RestController
 @RequestMapping("/interfaceInfo")
@@ -91,10 +90,17 @@ public class InterfaceController implements InitializingBean {
     @Resource
     private ModelInterfaceInfoService modelInterfaceInfoService;
 
+
     /**
      * 管理接口次数是否用尽的map
      */
-    private HashMap<Long,Boolean> interfaceInfoLeftNumMap = new HashMap<>();
+    private HashMap<Long, Boolean> interfaceInfoLeftNumMap = new HashMap<>();
+
+    /**
+     * 缓存反射调用结果，避免多次重复调用影响性能
+     */
+    private static Map<String, Method> methodCache = new HashMap<>();
+
 
     /**
      * 保存的文件路径
@@ -130,7 +136,7 @@ public class InterfaceController implements InitializingBean {
         long newInterfaceInfoId = interfaceInfo.getId();
 
         //将新接口的剩余调用次数加入到redis
-        redisTemplate.opsForValue().set("invoke" + interfaceInfo.getId(),interfaceInfo.getLeftNum());
+        redisTemplate.opsForValue().set("invoke" + interfaceInfo.getId(), interfaceInfo.getLeftNum());
         //初始化map,true代表有剩余，false代表无剩余
         interfaceInfoLeftNumMap.put(interfaceInfo.getId(), true);
 
@@ -160,19 +166,19 @@ public class InterfaceController implements InitializingBean {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = interfaceInfoService.removeById(id);
-        if (!b){
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"删除接口失败");
+        if (!b) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除接口失败");
         }
 
         //也将用户调用接口信息表中对应的接口删除
         QueryWrapper<UserInterfaceInfo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("interfaceInfoId",id);
+        queryWrapper.eq("interfaceInfoId", id);
         boolean remove = userInterfaceInfoService.remove(queryWrapper);
 
         //将redis里面对应的接口剩余次数删除
         Object andDelete = redisTemplate.opsForValue().getAndDelete("invoke" + oldInterfaceInfo.getId());
-        if (andDelete == null){
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"删除接口redis信息失败");
+        if (andDelete == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除接口redis信息失败");
         }
         //初始化map,true代表有剩余，false代表无剩余
         interfaceInfoLeftNumMap.remove(oldInterfaceInfo.getId());
@@ -201,19 +207,19 @@ public class InterfaceController implements InitializingBean {
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
         ThrowUtils.throwIf(oldInterfaceInfo == null, ErrorCode.NOT_FOUND_ERROR);
         boolean result = interfaceInfoService.updateById(interfaceInfo);
-        if (!result){
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"接口更新失败");
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口更新失败");
         }
 
         //修改用户调用接口信息
-        if (!Objects.equals(interfaceInfo.getStatus(), oldInterfaceInfo.getStatus())){
+        if (!Objects.equals(interfaceInfo.getStatus(), oldInterfaceInfo.getStatus())) {
             boolean update = userInterfaceInfoService.update(new UpdateWrapper<UserInterfaceInfo>().eq("interfaceInfo", id).set("status", interfaceInfo.getStatus()));
         }
 
         //对redis里的接口剩余次数进行更新
-        redisTemplate.opsForValue().set("invoke" + interfaceInfo.getId(),interfaceInfo.getLeftNum());
+        redisTemplate.opsForValue().set("invoke" + interfaceInfo.getId(), interfaceInfo.getLeftNum());
         //初始化map,true代表有剩余，false代表无剩余
-        if (interfaceInfo.getLeftNum() <= 0){
+        if (interfaceInfo.getLeftNum() <= 0) {
             interfaceInfoLeftNumMap.put(interfaceInfo.getId(), false);
         }
 
@@ -246,7 +252,7 @@ public class InterfaceController implements InitializingBean {
         boolean result = interfaceInfoService.updateById(interfaceInfo);
 
         UpdateWrapper<UserInterfaceInfo> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("interfaceInfoId",id).set("status",1);
+        updateWrapper.eq("interfaceInfoId", id).set("status", 1);
         boolean update = userInterfaceInfoService.update(updateWrapper);
 
         return ResultUtils.success(result);
@@ -277,7 +283,7 @@ public class InterfaceController implements InitializingBean {
         boolean result = interfaceInfoService.updateById(interfaceInfo);
         //对应所有用户调用表中的相关接口状态也设置成0
         UpdateWrapper<UserInterfaceInfo> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("interfaceInfoId",id).set("status",0);
+        updateWrapper.eq("interfaceInfoId", id).set("status", 0);
         boolean update = userInterfaceInfoService.update(updateWrapper);
 
         return ResultUtils.success(result);
@@ -311,6 +317,53 @@ public class InterfaceController implements InitializingBean {
 
 
     /**
+     * 获取反射调用接口的返回结果
+     * @param name
+     * @param multipartFile
+     * @param requestBody
+     * @param isUpload
+     * @param targetClass
+     * @return
+     */
+    private Object getInvokeResult(String name, MultipartFile multipartFile, String requestBody, Integer isUpload, Class targetClass) {
+
+        Method interfaceInfoMethod = methodCache.get(name);
+        Object result = null;
+        try {
+            if (interfaceInfoMethod == null) {
+
+                if (isUpload == 1) {
+                    if (multipartFile.isEmpty()) {
+                        throw new BusinessException(ErrorCode.PARAMS_ERROR, "未上传文件");
+                    }
+                    interfaceInfoMethod = myApiClient.getClass().getMethod(name, MultipartFile.class, targetClass);
+                    result = interfaceInfoMethod.invoke(myApiClient, multipartFile, requestBody);
+                } else {
+                    interfaceInfoMethod = myApiClient.getClass().getMethod(name, targetClass);
+                    result = interfaceInfoMethod.invoke(myApiClient, requestBody);
+                }
+                methodCache.put(name, interfaceInfoMethod);
+            } else {
+                if (isUpload == 1) {
+                    if (multipartFile.isEmpty()) {
+                        throw new BusinessException(ErrorCode.PARAMS_ERROR, "未上传文件");
+                    }
+                    result = interfaceInfoMethod.invoke(myApiClient, multipartFile, requestBody);
+                } else {
+                    interfaceInfoMethod = myApiClient.getClass().getMethod(name, targetClass);
+                    result = interfaceInfoMethod.invoke(myApiClient, requestBody);
+                }
+            }
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "该接口不存在或网关错误");
+        }
+
+        return result;
+
+    }
+
+
+    /**
      * 接口调用
      *
      * @param interfaceInfoInvokeRequest
@@ -325,14 +378,13 @@ public class InterfaceController implements InitializingBean {
         }
 
 
-
         // 判断是否存在
         Long id = interfaceInfoInvokeRequest.getId();
         Long userId = interfaceInfoInvokeRequest.getUserId();
         String requestBody = interfaceInfoInvokeRequest.getUserRequestBody();
 
-        if (StringUtils.isBlank(requestBody)){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"请求参数不能为空");
+        if (StringUtils.isBlank(requestBody)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数不能为空");
         }
 
         /**
@@ -345,8 +397,6 @@ public class InterfaceController implements InitializingBean {
 
 
         String name = oldInterfaceInfo.getName();
-        String parameterType = oldInterfaceInfo.getParameterType();
-        String method = oldInterfaceInfo.getMethod();
         Integer isUpload = oldInterfaceInfo.getIsUpload();
 
         //判断接口是否关闭
@@ -354,12 +404,12 @@ public class InterfaceController implements InitializingBean {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口已关闭");
         }
 
-        if (interfaceInfoLeftNumMap.get(id) == null){
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"该接口不存在或不能在数据库中添加数据");
+        if (interfaceInfoLeftNumMap.get(id) == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "该接口不存在或不能在数据库中添加数据");
         }
 
         //根据map判断接口剩余次数是否用尽
-        if (!interfaceInfoLeftNumMap.get(id)){
+        if (!interfaceInfoLeftNumMap.get(id)) {
             throw new BusinessException(ErrorCode.INTERFACE_LEFTNUM_RUNOUT);
         }
 
@@ -367,17 +417,15 @@ public class InterfaceController implements InitializingBean {
         //判断对应接口的剩余次数是否已用尽
         //redis预减操作，减少db压力
         Long decrement = redisTemplate.opsForValue().decrement("invoke" + id);
-        if (decrement <= 0){
+        if (decrement <= 0) {
             //接口调用次数已用尽
-            interfaceInfoLeftNumMap.put(id,false);
+            interfaceInfoLeftNumMap.put(id, false);
             throw new BusinessException(ErrorCode.INTERFACE_LEFTNUM_RUNOUT);
         }
 
         User loginUser = userService.getLoginUser(request);
         String accessKey = loginUser.getAccessKey();
         String secretKey = loginUser.getSecretKey();
-
-        MyApiClient myApiClientTemp = new MyApiClient(accessKey, secretKey, id);
 
         /**
          * todo 重构前面做的接口平台
@@ -392,29 +440,24 @@ public class InterfaceController implements InitializingBean {
             requestBody = jsonStr;
         }
 
+        /**
+         * 设置接口id,便于api网关统计接口数据
+         */
+        myApiClient.setInterfaceInfoId(id);
+        myApiClient.setAccessKey(accessKey);
+        myApiClient.setSecretKey(secretKey);
+
 
         /**
          *  这里需要根据传递的参数更加灵活转变
          */
-        Object result = null;
+
         Class targetClass = String.class;
-        Method interfaceInfoMethod = null;
-        try {
-            /**
-             * 找到接口对应的方法
-             */
-
-            if (isUpload == 1) {
-                if (multipartFile.isEmpty()) {
-                    throw new BusinessException(ErrorCode.PARAMS_ERROR, "未上传文件");
-                }
-                interfaceInfoMethod = myApiClientTemp.getClass().getMethod(name, MultipartFile.class, targetClass);
-                result = interfaceInfoMethod.invoke(myApiClientTemp, multipartFile, requestBody);
-            } else {
-                interfaceInfoMethod = myApiClientTemp.getClass().getMethod(name, targetClass);
-
-                result = interfaceInfoMethod.invoke(myApiClientTemp, requestBody);
-            }
+        /**
+         * 找到接口对应的方法
+         */
+        Object result = getInvokeResult(name, multipartFile,
+                requestBody, isUpload, targetClass);
 
 
 //
@@ -427,11 +470,6 @@ public class InterfaceController implements InitializingBean {
 //             */
 //            result = interfaceInfoMethod.invoke(myApiClientTemp, targetClass.cast(data));
 
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"网关错误");
-        }
 //        String userNameByPost = myApiClientTemp.getUserNameByPost(user);
         /**
          * 经网关提示错误返回的格式与成功调用接口返回的格式不一样，
@@ -444,7 +482,7 @@ public class InterfaceController implements InitializingBean {
 
         //说明是返回错误信息
         ErrorCode errorCode = ErrorCode.getEnumByMessage((String) result);
-        if (errorCode != null){
+        if (errorCode != null) {
             return ResultUtils.error(errorCode);
         }
         //否则就是正常调用返回
@@ -515,14 +553,14 @@ public class InterfaceController implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         List<InterfaceInfo> interfaceInfos = interfaceInfoService.list();
-        if (interfaceInfos.isEmpty()){
+        if (interfaceInfos.isEmpty()) {
             return;
         }
         /**
          * 将所有的接口的剩余调用次数放到redis中
          */
         interfaceInfos.forEach(interfaceInfo -> {
-            redisTemplate.opsForValue().set("invoke" + interfaceInfo.getId(),interfaceInfo.getLeftNum());
+            redisTemplate.opsForValue().set("invoke" + interfaceInfo.getId(), interfaceInfo.getLeftNum());
             //初始化map,true代表有剩余，false代表无剩余
             interfaceInfoLeftNumMap.put(interfaceInfo.getId(), true);
         });

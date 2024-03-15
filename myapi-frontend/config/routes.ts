@@ -49,5 +49,6 @@
       },
     ],
   },
+  { path: '/', redirect: '/index' },
   { path: '*', layout: false, component: './404' },
 ];

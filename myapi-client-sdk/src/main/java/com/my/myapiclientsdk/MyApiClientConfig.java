@@ -14,10 +14,9 @@ import org.springframework.context.annotation.Configuration;
 public class MyApiClientConfig {
     private String accessKey;
     private String secretKey;
-    private Long interfaceInfoId;
 
     @Bean
     public MyApiClient myApiClient(){
-        return new MyApiClient(accessKey,secretKey,interfaceInfoId);
+        return new MyApiClient(accessKey,secretKey);
     }
 }

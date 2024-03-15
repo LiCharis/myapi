@@ -1,12 +1,10 @@
 package com.my.myapiclientsdk.client;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.resource.InputStreamResource;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
-import cn.hutool.json.JSONUtil;
 import com.google.gson.Gson;
 import com.my.myapiclientsdk.model.GenChartByAiRequest;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,9 +27,26 @@ public class MyApiClient {
     //网关地址
     private static final String GATEWAY_HOST = "http://localhost:8090/api";
 
+    public MyApiClient(String accessKey, String secretKey) {
+        this.accessKey = accessKey;
+        this.secretKey = secretKey;
+    }
+
     public MyApiClient(String accessKey, String secretKey, Long interfaceInfoId) {
         this.accessKey = accessKey;
         this.secretKey = secretKey;
+        this.interfaceInfoId = interfaceInfoId;
+    }
+
+    public void setAccessKey(String accessKey) {
+        this.accessKey = accessKey;
+    }
+
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
+    }
+
+    public void setInterfaceInfoId(Long interfaceInfoId){
         this.interfaceInfoId = interfaceInfoId;
     }
 
